@@ -1,0 +1,111 @@
+{
+  "application": "nmap-flow-analyzer",
+  "version": "1.2.4",
+  "run_id": "3c0c7119f5e4",
+  "started_at": "2026-07-22T05:55:03",
+  "completed_at": "2026-07-22T05:55:04",
+  "input_file": "examples/sample-scan.xml",
+  "generated_files": [
+    {
+      "path": "analysis_report.html",
+      "size": 37840,
+      "sha256": "918ed184f62eba969cd785d8c75493f79f60b8cdc0758d262f83f797182fb065"
+    },
+    {
+      "path": "data_flow_diagram.dot",
+      "size": 2559,
+      "sha256": "09e64f616c970d475389d6effe5bdb0f6d3b78b0a8de52e06b36611dec89dbb9"
+    },
+    {
+      "path": "data_flow_diagram.mmd",
+      "size": 1559,
+      "sha256": "e86333addcb2872217c0036b70b9896644518508a9d4e54a01c28f02c053672b"
+    },
+    {
+      "path": "data_flow_diagram.png",
+      "size": 110474,
+      "sha256": "f33dd6fdba567e16a859461d2384e80e91776574385d688fc5feb622170b2ccc"
+    },
+    {
+      "path": "data_flow_diagram.svg",
+      "size": 12943,
+      "sha256": "93b5cc5c78c7d8a8627c454193388689c3685dcca10881819a56ab13648e2c39"
+    },
+    {
+      "path": "findings_summary.md",
+      "size": 5380,
+      "sha256": "cbb494bd44715bcdc9b2e9151299115b58e93004def6130e6abb16b466cb016b"
+    },
+    {
+      "path": "firewall_exceptions.xlsx",
+      "size": 20161,
+      "sha256": "dd21856bb736d69373a1553f39854acab0ad69affb0cb3dececfb283aeeb44f2"
+    },
+    {
+      "path": "inbound_exceptions.csv",
+      "size": 6587,
+      "sha256": "8440450bfe27d088f273007b1ecfa4024a11e80afcc96f08d6ef1488bdf5531d"
+    },
+    {
+      "path": "inbound_exceptions.json",
+      "size": 18232,
+      "sha256": "4bf1e81d766ec8ebdbc85680f227dfea9aced06b760003246d2a621e5a16bcee"
+    },
+    {
+      "path": "manual_review.csv",
+      "size": 3099,
+      "sha256": "81528dadc9811ceeaf4383d5b53d34d6926a705e5cd97aa95198d3dca0022bca"
+    },
+    {
+      "path": "normalized_data.json",
+      "size": 85915,
+      "sha256": "14309fb1c466ed61113c6ef052c4b6a0642380e7f4dd318802d8457c5ef20aa9"
+    },
+    {
+      "path": "outbound_exceptions.csv",
+      "size": 1671,
+      "sha256": "23e208818ceae3aa65882905760d27879af2a0bb17931450060f71c6de06ecef"
+    },
+    {
+      "path": "outbound_exceptions.json",
+      "size": 2291,
+      "sha256": "12d4ed1cb539813083d3c907e0ac9fd71f77a2584cb9f98d9c329a2849b8a683"
+    },
+    {
+      "path": "service_inventory.csv",
+      "size": 5030,
+      "sha256": "e09ec42ef049d509d6bdcaffb0c4d7a94c2b32c74b55b6c8373d612da4b4b590"
+    },
+    {
+      "path": "service_inventory.json",
+      "size": 15201,
+      "sha256": "824b7dd6ff79e2aa6133ad2a335e4dcf620663595b4c1289a0db4f65a4ea11b0"
+    }
+  ],
+  "graphviz": {
+    "available": true,
+    "svg_rendered": true,
+    "png_rendered": true,
+    "error": null
+  },
+  "excel_requested": true,
+  "excel_generated": true,
+  "spreadsheet_sanitization": true,
+  "zeek": {
+    "requested": false,
+    "active": false,
+    "input_directories": [],
+    "files_processed": [],
+    "log_types_found": [],
+    "record_counts": {},
+    "malformed_record_counts": {},
+    "log_type_summaries": [],
+    "raw_records_read": {},
+    "usable_records": {},
+    "earliest_timestamp": "",
+    "latest_timestamp": "",
+    "sensor_health": "n/a",
+    "artifacts_generated": false,
+    "warnings": []
+  }
+}

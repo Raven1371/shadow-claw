@@ -1,0 +1,37 @@
+digraph nmap_flows {
+  rankdir=LR;
+  fontname="Helvetica"; fontsize=11;
+  node [shape=box, style="rounded,filled", fillcolor="#f6f8fa", fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9];
+  label="Network Data-Flow Diagram (Nmap-derived)\nScan origin: 192.168.1.50    Scan started: Mon Jul  1 10:00:00 2026\nThis report describes services and reachability observed from the Nmap scanner’s location. It does not independently prove normal production communications between all listed systems."; labelloc="b";
+  subgraph cluster_zone_0 {
+    label="Zone: Management"; color="#8c959f"; style="rounded";
+    n_192_168_1_50 [label="sec-scan01\\n192.168.1.50"];
+  }
+  subgraph cluster_zone_1 {
+    label="Zone: Servers"; color="#8c959f"; style="rounded";
+    n_192_168_10_10 [label="dc01.example.local\n192.168.10.10\nMicrosoft Windows Server 2019\nDomain controller (100%)"];
+    n_192_168_10_20 [label="web01.example.local\n192.168.10.20\nLinux 5.15\nWeb server (100%)"];
+    n_192_168_10_30 [label="db01.example.local\n192.168.10.30\nLinux 5.15\nDatabase server (100%)"];
+    n_192_168_10_40 [label="legacy01.example.local\n192.168.10.40\nMicrosoft Windows 7"];
+  }
+  n_192_168_1_50 -> n_192_168_10_10 [label="tcp/389 LDAP\ntcp/445 SMB\ntcp/53 DNS\ntcp/88 Kerberos\nudp/53 DNS", style=solid, color="#24292f", fontcolor="#24292f"];
+  n_192_168_1_50 -> n_192_168_10_20 [label="tcp/22 SSH\ntcp/443 HTTPS", style=solid, color="#24292f", fontcolor="#24292f"];
+  n_192_168_1_50 -> n_192_168_10_30 [label="tcp/5432 PostgreSQL", style=solid, color="#24292f", fontcolor="#24292f"];
+  n_192_168_1_50 -> n_192_168_10_40 [label="tcp/23 Telnet\ntcp/445 SMB\ntcp/9100 Raw Print", style=solid, color="#24292f", fontcolor="#24292f"];
+  n_192_168_10_20 -> n_192_168_10_30 [label="tcp/5432 PostgreSQL", style=dotted, color="#1a7f37", fontcolor="#1a7f37"];
+  subgraph cluster_legend {
+    label="Legend"; color="#8c959f"; fontsize=10;
+    node [shape=plaintext, fillcolor=white, style=""];
+    leg_a_0 [label=""]; leg_b_0 [label="Inferred"];
+    leg_a_0 -> leg_b_0 [style=dashed, color="#0969da"];
+    leg_a_1 [label=""]; leg_b_1 [label="Manual Review Required"];
+    leg_a_1 -> leg_b_1 [style=dashed, color="#cf222e"];
+    leg_a_2 [label=""]; leg_b_2 [label="Observed"];
+    leg_a_2 -> leg_b_2 [style=solid, color="#24292f"];
+    leg_a_3 [label=""]; leg_b_3 [label="Unknown"];
+    leg_a_3 -> leg_b_3 [style=dashed, color="#9a6700"];
+    leg_a_4 [label=""]; leg_b_4 [label="User-Defined"];
+    leg_a_4 -> leg_b_4 [style=dotted, color="#1a7f37"];
+  }
+}

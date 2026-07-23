@@ -1,0 +1,2 @@
+{"ts": 1784534400.0, "host": "192.168.10.20", "name": "nginx", "software_type": "HTTP::SERVER", "version.major": 1, "version.minor": 24}
+{"ts": 1784534400.0, "host": "192.168.10.30", "name": "PostgreSQL", "software_type": "SERVER", "version.major": 16, "version.minor": 2}

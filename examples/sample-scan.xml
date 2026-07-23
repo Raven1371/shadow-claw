@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nmaprun scanner="nmap" args="nmap -sS -sU -sV -O --script vuln,smb-protocols -oX sample-scan.xml 192.168.10.0/24" start="1719800000" startstr="Mon Jul  1 10:00:00 2026" version="7.95" xmloutputversion="1.05">
+<scaninfo type="syn" protocol="tcp" numservices="1000" services="1-1000"/>
+<scaninfo type="udp" protocol="udp" numservices="100" services="53,123,161"/>
+<host><status state="up" reason="arp-response"/>
+<address addr="192.168.10.10" addrtype="ipv4"/>
+<address addr="00:50:56:AA:10:10" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="dc01.example.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="53"><state state="open" reason="syn-ack"/><service name="domain" product="Simple DNS Plus" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="88"><state state="open" reason="syn-ack"/><service name="kerberos-sec" product="Microsoft Windows Kerberos" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="389"><state state="open" reason="syn-ack"/><service name="ldap" product="Microsoft Windows Active Directory LDAP" method="probed" conf="10"/></port>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack"/><service name="microsoft-ds" method="table"/>
+<script id="smb-protocols" output="&#10;  dialects: &#10;    NT LM 0.12 (SMBv1) [dangerous, but default]&#10;    2.0.2&#10;    3.1.1"/>
+</port>
+<port protocol="udp" portid="53"><state state="open" reason="udp-response"/><service name="domain" method="table"/></port>
+<port protocol="udp" portid="123"><state state="open|filtered" reason="no-response"/><service name="ntp" method="table"/></port>
+</ports>
+<os><osmatch name="Microsoft Windows Server 2019" accuracy="96"><osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="2019" accuracy="96"/></osmatch></os>
+</host>
+<host><status state="up" reason="arp-response"/>
+<address addr="192.168.10.20" addrtype="ipv4"/>
+<address addr="00:50:56:AA:10:20" addrtype="mac" vendor="VMware"/>
+<hostnames><hostname name="web01.example.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="22"><state state="open" reason="syn-ack"/><service name="ssh" product="OpenSSH" version="9.6p1" method="probed" conf="10"><cpe>cpe:/a:openbsd:openssh:9.6p1</cpe></service></port>
+<port protocol="tcp" portid="443"><state state="open" reason="syn-ack"/><service name="http" product="nginx" version="1.24.0" tunnel="ssl" method="probed" conf="10"><cpe>cpe:/a:nginx:nginx:1.24.0</cpe></service></port>
+<port protocol="tcp" portid="80"><state state="closed" reason="reset"/><service name="http" method="table"/></port>
+<port protocol="tcp" portid="8443" ><state state="filtered" reason="no-response"/><service name="https-alt" method="table"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="94"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X" accuracy="94"/></osmatch></os>
+</host>
+<host><status state="up" reason="arp-response"/>
+<address addr="192.168.10.30" addrtype="ipv4"/>
+<hostnames><hostname name="db01.example.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="5432"><state state="open" reason="syn-ack"/><service name="postgresql" product="PostgreSQL DB" version="16.3" method="probed" conf="10"/></port>
+<port protocol="udp" portid="161"><state state="open|filtered" reason="no-response"/><service name="snmp" method="table"/></port>
+</ports>
+<os><osmatch name="Linux 5.15" accuracy="91"><osclass type="general purpose" vendor="Linux" osfamily="Linux" osgen="5.X" accuracy="91"/></osmatch></os>
+</host>
+<host><status state="up" reason="arp-response"/>
+<address addr="192.168.10.40" addrtype="ipv4"/>
+<hostnames><hostname name="legacy01.example.local" type="PTR"/></hostnames>
+<ports>
+<port protocol="tcp" portid="445"><state state="open" reason="syn-ack"/><service name="microsoft-ds" product="Microsoft Windows 7 - 10 microsoft-ds" method="probed" conf="10"/>
+<script id="smb-vuln-ms17-010" output="&#10;  VULNERABLE:&#10;  Remote Code Execution vulnerability in Microsoft SMBv1 servers (ms17-010)&#10;    State: VULNERABLE&#10;    IDs:  CVE:CVE-2017-0144&#10;    Risk factor: HIGH"/>
+</port>
+<port protocol="tcp" portid="23"><state state="open" reason="syn-ack"/><service name="telnet" method="table"/></port>
+<port protocol="tcp" portid="9100"><state state="open" reason="syn-ack"/><service name="jetdirect" method="table"/></port>
+</ports>
+<os><osmatch name="Microsoft Windows 7" accuracy="89"><osclass type="general purpose" vendor="Microsoft" osfamily="Windows" osgen="7" accuracy="89"/></osmatch></os>
+<hostscript><script id="smb-os-discovery" output="&#10;  OS: Windows 7 Professional 7601 Service Pack 1&#10;  Computer name: legacy01&#10;  Domain name: example.local&#10;  Also reachable from: 192.168.10.10"/></hostscript>
+</host>
+<runstats><finished time="1719800400" timestr="Mon Jul  1 10:06:40 2026" elapsed="400" summary="4 hosts up"/><hosts up="4" down="0" total="4"/></runstats>
+</nmaprun>
