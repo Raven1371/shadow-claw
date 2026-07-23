@@ -79,7 +79,7 @@ def write_csv(
     for row in rows:
         writer.writerow(sanitize_row(as_flat_dict(row), enabled=sanitize))
     atomic_write_text(path, buffer.getvalue())
-    LOG.debug("Wrote %s (%d rows)", path.name, len(rows))
+    LOG.debug("Wrote %s (%s)", path.name, count_noun(len(rows), "row"))
 
 
 def write_json_object(path: Path, payload: Dict[str, Any]) -> None:
@@ -92,7 +92,7 @@ def write_json_object(path: Path, payload: Dict[str, Any]) -> None:
 def write_json(path: Path, rows: Sequence[Any]) -> None:
     data = [dataclasses.asdict(row) for row in rows]
     atomic_write_text(path, json.dumps(data, indent=2, ensure_ascii=False) + "\n")
-    LOG.debug("Wrote %s (%d records)", path.name, len(rows))
+    LOG.debug("Wrote %s (%s)", path.name, count_noun(len(rows), "record"))
 
 
 # ---------------------------------------------------------------------------
@@ -488,7 +488,8 @@ def _table(rows: Sequence[Dict[str, Any]], columns: Sequence[Tuple[str, str]], t
         body_rows.append(f"<tr>{cells}</tr>")
     return (
         f'<input class="tbl-filter" data-table="{table_id}" type="search" '
-        f'placeholder="Filter {len(rows)} rows..." aria-label="Filter table">'
+        f'placeholder="Filter {count_noun(len(rows), "row")}..." '
+        'aria-label="Filter table">'
         f'<div class="tbl-wrap"><table id="{table_id}" class="sortable">'
         f"<thead><tr>{head}</tr></thead><tbody>{''.join(body_rows)}</tbody>"
         "</table></div>"

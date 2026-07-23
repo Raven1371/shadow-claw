@@ -330,10 +330,10 @@ def test_explicit_tsv_on_json_content_is_not_silently_accepted():
 # Version
 # ===========================================================================
 
-def test_version_is_1_2_4():
+def test_version_is_1_2_5():
     from nmap_flow_analyzer import __version__
 
-    assert __version__ == "1.2.4"
+    assert __version__ == "1.2.5"
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         (tmp / "scan.xml").write_text(MULTI_HOST_XML, encoding="utf-8")
@@ -344,5 +344,5 @@ def test_version_is_1_2_4():
                      "--scanner-ip", "192.168.1.50",
                      "--zeek-dir", str(zdir)]) == 0
         manifest = json.loads((out / "run_manifest.json").read_text("utf-8"))
-        assert manifest["version"] == "1.2.4"
-        assert "1.2.4" in (out / "analysis_report.html").read_text("utf-8")
+        assert manifest["version"] == "1.2.5"
+        assert "1.2.5" in (out / "analysis_report.html").read_text("utf-8")

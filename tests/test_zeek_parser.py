@@ -202,7 +202,14 @@ def test_symlinked_files_and_directories_skipped():
         link_file = real / "dns.log"
         target = Path(tmp) / "outside.log"
         target.write_text('{"uid": "X"}\n', encoding="utf-8")
-        os.symlink(target, link_file)
+        try:
+            os.symlink(target, link_file)
+        except (OSError, NotImplementedError, AttributeError) as exc:
+            import pytest
+            pytest.skip(
+                "platform cannot create symbolic links required by this "
+                f"security setup: {exc}"
+            )
         link_dir = Path(tmp) / "linkdir"
         os.symlink(real, link_dir)
         zeek = load([real, link_dir])

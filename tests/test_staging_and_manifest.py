@@ -31,7 +31,7 @@ def test_manifest_written_and_accurate():
         assert _run(tmp, out, ["--excel"]) == 0
         manifest = json.loads((out / "run_manifest.json").read_text("utf-8"))
         assert manifest["application"] == "nmap-flow-analyzer"
-        assert manifest["version"] == "1.2.4"
+        assert manifest["version"] == "1.2.5"
         assert manifest["run_id"] and manifest["started_at"]
         assert manifest["excel_requested"] is True
         assert manifest["excel_generated"] is True

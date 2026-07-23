@@ -22,7 +22,7 @@ from .diagrams import write_diagrams
 from .excel_export import export_excel
 from .firewall_rules import build_inbound, build_outbound
 from .flow_analysis import AnalysisOptions, build_flows, enrich_hosts
-from .logging_config import setup_logging
+from .logging_config import close_invocation_logging, setup_logging
 from .output_safety import (
     OutputSafetyError,
     safe_remove_stale,
@@ -323,7 +323,7 @@ def _write_manifest(ctx: RunContext, staging: Path, args, metadata,
     )
 
 
-def main(argv: Optional[List[str]] = None) -> int:
+def _main(argv: Optional[List[str]] = None) -> int:
     args = build_arg_parser().parse_args(argv)
 
     output_dir: Path = args.output_dir
@@ -758,6 +758,15 @@ def main(argv: Optional[List[str]] = None) -> int:
         print(excel_message)
     log.info("Analysis complete")
     return 0
+
+
+def main(argv: Optional[List[str]] = None) -> int:
+    """Run one analyzer invocation and release only its owned log handlers."""
+    logger = logging.getLogger("nmap_flow_analyzer")
+    try:
+        return _main(argv)
+    finally:
+        close_invocation_logging(logger)
 
 
 if __name__ == "__main__":  # pragma: no cover

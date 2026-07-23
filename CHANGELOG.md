@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.2.5 - Windows logging-lifecycle portability hotfix
+
+- Analyzer-created console and `execution.log` handlers are now explicitly
+  flushed, detached, and closed at the end of every invocation.
+- Repeated in-process runs no longer accumulate handlers or duplicate log
+  lines, and completed output directories can be renamed or deleted
+  immediately on Windows.
+- Parent-application, pytest, GUI, and unrelated handlers remain untouched.
+- Corrected the approved singular wording for `1 row` and `1 record`.
+- Analyzer decisions, firewall candidates, schemas, security controls, and
+  deterministic identifiers are unchanged.
+
 ## v1.2.4 - parser-hardening and wording polish
 
 Small, narrowly scoped maintenance release. No architectural, correlation,
