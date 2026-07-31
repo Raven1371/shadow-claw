@@ -4,6 +4,8 @@
 
 - Added authoritative PEP 517/621 metadata in `pyproject.toml` and the
   `nmap-flow-analyzer` console entry point.
+- Added offline `doctor` and `preflight` commands with JSON automation output,
+  bounded Graphviz SVG/PNG smoke tests, and no implicit network access.
 - Separated runtime dependencies from development and build tooling.
 - Preserved v1.2.5 analyzer behavior while beginning platform-specific
   packaging and release automation.

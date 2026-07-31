@@ -31,6 +31,16 @@ python -m pytest -q
 dependencies. `requirements.txt` is retained as a compatible runtime-only
 mirror for legacy and closed-network installation workflows.
 
+Inspect an installation without performing network access:
+
+```bash
+nmap-flow-analyzer doctor
+nmap-flow-analyzer preflight --json --non-interactive
+```
+
+See `docs/PREFLIGHT.md` for checks, automation behavior, and Graphviz
+resolution details. No automatic update checks are performed.
+
 Optional, for SVG/PNG diagram rendering (the `.dot` and `.mmd` sources are always written even without it):
 
 ```bash

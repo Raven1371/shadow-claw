@@ -122,6 +122,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--zeek-required", action="store_true",
                         help="Treat missing or unusable Zeek conn.log data as "
                              "a fatal error instead of continuing Nmap-only")
+    parser.add_argument("--no-preflight", action="store_true",
+                        help="Explicitly suppress startup preflight checks")
+    parser.add_argument("--non-interactive", action="store_true",
+                        help="Run without prompts (normal analysis is already prompt-free)")
     parser.add_argument("--version", action="version",
                         version=f"{TOOL_NAME} {__version__}")
     return parser
@@ -762,9 +766,14 @@ def _main(argv: Optional[List[str]] = None) -> int:
 
 def main(argv: Optional[List[str]] = None) -> int:
     """Run one analyzer invocation and release only its owned log handlers."""
+    effective_argv = list(sys.argv[1:] if argv is None else argv)
+    if effective_argv and effective_argv[0] in {"doctor", "preflight"}:
+        from .preflight import main as preflight_main
+
+        return preflight_main(effective_argv[1:], command=effective_argv[0])
     logger = logging.getLogger("nmap_flow_analyzer")
     try:
-        return _main(argv)
+        return _main(effective_argv)
     finally:
         close_invocation_logging(logger)
 
