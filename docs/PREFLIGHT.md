@@ -12,6 +12,9 @@ operating system and architecture, packaging mode, required modules, YAML and
 Excel support, temporary/output-directory writability, Graphviz discovery and
 bounded SVG/PNG rendering, package-integrity configuration, and update mode.
 
+Neither command performs a network request. Update discovery is a separate,
+explicit user action documented in `docs/UPDATES.md`.
+
 For automation, use JSON-only output:
 
 ```text
@@ -38,4 +41,3 @@ Preflight never contacts the network and never checks for updates. Normal
 analysis remains prompt-free. `--no-preflight` is accepted for explicit
 automation policy, although v1.3.0 does not run dedicated preflight commands
 implicitly.
-

@@ -771,6 +771,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         from .preflight import main as preflight_main
 
         return preflight_main(effective_argv[1:], command=effective_argv[0])
+    if effective_argv and effective_argv[0] == "update":
+        from .update import main as update_main
+
+        return update_main(effective_argv[1:])
     logger = logging.getLogger("nmap_flow_analyzer")
     try:
         return _main(effective_argv)
