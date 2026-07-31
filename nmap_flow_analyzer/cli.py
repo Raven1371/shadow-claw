@@ -51,6 +51,7 @@ from .zeek_models import CorrelationFinding, ZeekFlowAggregate
 from .flow_analysis import sort_and_assign_flow_ids
 from .risk_analysis import build_service_records, collect_vuln_findings
 from .models import ServiceRecord
+from .runtime import configure_bundled_graphviz
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -766,6 +767,7 @@ def _main(argv: Optional[List[str]] = None) -> int:
 
 def main(argv: Optional[List[str]] = None) -> int:
     """Run one analyzer invocation and release only its owned log handlers."""
+    configure_bundled_graphviz()
     effective_argv = list(sys.argv[1:] if argv is None else argv)
     if effective_argv and effective_argv[0] in {"doctor", "preflight"}:
         from .preflight import main as preflight_main

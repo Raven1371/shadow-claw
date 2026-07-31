@@ -62,6 +62,7 @@ def _graphviz_candidates(configured: Optional[Path]) -> Sequence[tuple]:
         candidates.append(("configured external", path))
     executable_dir = Path(sys.executable).resolve().parent
     bundle_roots = [
+        Path(getattr(sys, "_MEIPASS", executable_dir)) / "graphviz" / "bin" / executable,
         executable_dir / "graphviz" / "bin" / executable,
         executable_dir.parent / "graphviz" / "bin" / executable,
     ]
@@ -202,4 +203,3 @@ def main(argv: Optional[List[str]] = None, command: str = "preflight") -> int:
         print()
         print(UPDATE_REMINDER)
     return 1 if failed else 0
-
