@@ -1,0 +1,126 @@
+name: Verify v1.2.5 on Ubuntu
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [release/v1.3.0-linux-rc]
+    paths:
+      - ".github/workflows/verify-v125-ubuntu.yml"
+      - "scripts/run_pytest_with_skip_report.py"
+  pull_request:
+    paths:
+      - ".github/workflows/verify-v125-ubuntu.yml"
+      - "scripts/run_pytest_with_skip_report.py"
+
+permissions:
+  contents: read
+
+env:
+  V125_COMMIT: 9ab10fed186b3a0d8c2813a1a86a80ebf0a56b41
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install Graphviz and test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Materialize fixed v1.2.5 candidate
+        run: git worktree add --detach candidate "$V125_COMMIT"
+      - name: Record platform capabilities
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/capabilities
+          {
+            cat /etc/os-release
+            uname -a
+            uname -m
+            python --version
+            python -m pip --version
+            git rev-parse HEAD
+            git -C candidate rev-parse HEAD
+            dot -V
+          } 2>&1 | tee artifacts/platform.txt
+          ln -s target artifacts/capabilities/file-link
+          mkdir artifacts/capabilities/real-directory
+          ln -s real-directory artifacts/capabilities/directory-link
+          mkfifo artifacts/capabilities/test.fifo
+          test -L artifacts/capabilities/file-link
+          test -L artifacts/capabilities/directory-link
+          test -p artifacts/capabilities/test.fifo
+          printf 'digraph G { a -> b }\n' > artifacts/capabilities/smoke.dot
+          dot -Tsvg artifacts/capabilities/smoke.dot -o artifacts/capabilities/smoke.svg
+          dot -Tpng artifacts/capabilities/smoke.dot -o artifacts/capabilities/smoke.png
+          test -s artifacts/capabilities/smoke.svg
+          test -s artifacts/capabilities/smoke.png
+      - name: Compile and run classified full suite
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m compileall -q candidate/nmap_flow_analyzer
+          python scripts/run_pytest_with_skip_report.py \
+            --platform ubuntu-24.04 \
+            --test-root candidate \
+            --json artifacts/skips.json \
+            --markdown artifacts/skips.md \
+            -- -q 2>&1 | tee artifacts/pytest.log
+      - name: Run offline and focused Linux gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          (cd candidate && python run_tests.py) 2>&1 | tee artifacts/offline-tests.log
+          (cd candidate && python -m pytest -q \
+            tests/test_logging_lifecycle.py \
+            tests/test_output_security.py \
+            tests/test_zeek_parser.py::test_symlinked_files_and_directories_skipped \
+            tests/test_zeek_rules_and_outputs.py::test_symlinked_zeek_artifact_destination_rejected \
+            tests/test_runtime_safety.py::test_graphviz_success_renders_images \
+            tests/test_runtime_safety.py::test_graphviz_unavailable_keeps_sources) \
+            2>&1 | tee artifacts/focused-linux-gates.log
+      - name: Run representative analyses
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONPATH=candidate python candidate/nmap_flow_analyzer.py \
+            --input candidate/examples/sample-scan.xml \
+            --config candidate/network_config.example.yaml \
+            --output-dir artifacts/nmap-only --scanner-ip 192.168.1.50
+          PYTHONPATH=candidate python candidate/nmap_flow_analyzer.py \
+            --input candidate/examples/sample-scan.xml \
+            --config candidate/network_config.example.yaml \
+            --zeek-dir candidate/examples/zeek-sample \
+            --output-dir artifacts/nmap-zeek --scanner-ip 192.168.1.50
+          test -s artifacts/nmap-only/data_flow_diagram.svg
+          test -s artifacts/nmap-only/data_flow_diagram.png
+          test -s artifacts/nmap-zeek/data_flow_diagram.svg
+          test -s artifacts/nmap-zeek/data_flow_diagram.png
+      - name: Write job summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Ubuntu v1.2.5 verification"
+            echo
+            echo "Candidate: \`$V125_COMMIT\`"
+            echo
+            if test -f artifacts/skips.md; then cat artifacts/skips.md; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v125-ubuntu-verification-${{ github.run_id }}
+          path: artifacts/
+          if-no-files-found: error

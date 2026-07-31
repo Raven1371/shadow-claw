@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "candidate_commit": "9ab10fed186b3a0d8c2813a1a86a80ebf0a56b41",
+  "overall_status": "pending_linux_workflow_execution",
+  "platforms": {
+    "ubuntu-24.04": {
+      "status": "PENDING WORKFLOW EXECUTION",
+      "verified": false
+    },
+    "rocky-linux-9": {
+      "status": "PENDING WORKFLOW EXECUTION",
+      "verified": false
+    },
+    "windows-restricted": {
+      "status": "PREVIOUSLY TESTED",
+      "verified": false
+    },
+    "windows-11-self-hosted": {
+      "status": "PENDING EXTERNAL SELF-HOSTED WINDOWS 11 RUNNER",
+      "verified": false
+    }
+  }
+}
