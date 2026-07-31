@@ -1,8 +1,10 @@
 """Offline doctor/preflight command coverage."""
 
+import io
 import json
 import subprocess
 import tempfile
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
@@ -10,35 +12,46 @@ from nmap_flow_analyzer.cli import main
 from nmap_flow_analyzer.preflight import Check, discover_graphviz, run_checks
 
 
-def test_preflight_json_is_machine_readable_and_offline(capsys):
+def _captured_main(arguments):
+    output = io.StringIO()
+    with redirect_stdout(output):
+        return_code = main(arguments)
+    return return_code, output.getvalue()
+
+
+def test_preflight_json_is_machine_readable_and_offline():
     with mock.patch(
         "nmap_flow_analyzer.preflight.run_checks",
         return_value=[Check("Application", "pass", "ok")],
     ), mock.patch("socket.create_connection", side_effect=AssertionError("network used")):
-        assert main(["preflight", "--json", "--non-interactive"]) == 0
-    payload = json.loads(capsys.readouterr().out)
+        return_code, output = _captured_main(
+            ["preflight", "--json", "--non-interactive"]
+        )
+    assert return_code == 0
+    payload = json.loads(output)
     assert payload["network_access_performed"] is False
     assert payload["status"] == "ready"
 
 
-def test_doctor_and_preflight_are_aliases(capsys):
+def test_doctor_and_preflight_are_aliases():
     with mock.patch(
         "nmap_flow_analyzer.preflight.run_checks",
         return_value=[Check("Application", "pass", "ok")],
     ):
-        assert main(["doctor", "--non-interactive"]) == 0
-    output = capsys.readouterr().out
+        return_code, output = _captured_main(["doctor", "--non-interactive"])
+    assert return_code == 0
     assert "No automatic update checks are performed." in output
     assert "Use the update command" in output
 
 
-def test_critical_failure_returns_nonzero(capsys):
+def test_critical_failure_returns_nonzero():
     with mock.patch(
         "nmap_flow_analyzer.preflight.run_checks",
         return_value=[Check("Temporary directory", "fail", "blocked", True)],
     ):
-        assert main(["preflight", "--json"]) == 1
-    assert json.loads(capsys.readouterr().out)["status"] == "failed"
+        return_code, output = _captured_main(["preflight", "--json"])
+    assert return_code == 1
+    assert json.loads(output)["status"] == "failed"
 
 
 def test_graphviz_resolution_prefers_explicit_path():
@@ -67,4 +80,8 @@ def test_graphviz_render_test_is_bounded_and_checks_both_formats():
         checks = run_checks(graphviz_timeout=3)
     assert any(check.name == "Graphviz SVG render" for check in checks)
     assert any(check.name == "Graphviz PNG render" for check in checks)
-    assert all(call.kwargs.get("timeout") == 3 for call in run.call_args_list)
+    graphviz_calls = [
+        call for call in run.call_args_list if isinstance(call.args[0], list)
+    ]
+    assert len(graphviz_calls) == 3
+    assert all(call.kwargs.get("timeout") == 3 for call in graphviz_calls)
