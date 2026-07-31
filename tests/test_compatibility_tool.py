@@ -7,7 +7,9 @@ def test_normalization_removes_only_approved_metadata():
     value = {
         "version": "1.2.4",
         "run_id": "abc",
+        "Run ID": "display-abc",
         "started_at": "now",
+        "generated": "2026-07-31T23:00:07",
         "source_ip": "10.0.0.1",
         "confidence": "high",
         "generated_files": [{"path": "a.json", "size": 1, "sha256": "x"}],
@@ -15,7 +17,9 @@ def test_normalization_removes_only_approved_metadata():
     normalized = normalize_value(value)
     assert normalized["version"] == "<VERSION>"
     assert "run_id" not in normalized
+    assert "Run ID" not in normalized
     assert "started_at" not in normalized
+    assert "generated" not in normalized
     assert normalized["source_ip"] == "10.0.0.1"
     assert normalized["confidence"] == "high"
     assert normalized["generated_files"] == [{"path": "a.json"}]

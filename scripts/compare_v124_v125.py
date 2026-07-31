@@ -11,7 +11,9 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 
-VOLATILE_KEYS = {"run_id", "started_at", "completed_at", "generated_at"}
+VOLATILE_KEYS = {
+    "run_id", "Run ID", "started_at", "completed_at", "generated_at", "generated",
+}
 VERSION_RE = re.compile(r"\b1\.2\.[45]\b")
 
 

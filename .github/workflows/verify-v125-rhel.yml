@@ -32,8 +32,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Trust the container-mounted checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Install test dependencies
-        run: python3 -m pip install -r requirements.txt
+        run: |
+          python3 -m pip install -r requirements.txt
+          python3 -m pip install pytest
       - name: Materialize fixed v1.2.5 candidate
         run: git worktree add --detach candidate "$V125_COMMIT"
       - name: Record platform capabilities
