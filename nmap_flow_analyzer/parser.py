@@ -244,9 +244,13 @@ def parse_nmap_xml(path: Path) -> Tuple[ScanMetadata, List[Host]]:
 
     metadata = ScanMetadata(source_file=path.name)
     hosts: Dict[str, Host] = {}
+    source = None
 
     try:
-        context = ET.iterparse(str(path), events=("start", "end"))
+        # Open the input ourselves so early parser exits cannot leave the
+        # internally opened iterparse handle alive on Windows.
+        source = path.open("rb")
+        context = ET.iterparse(source, events=("start", "end"))
         try:
             event, root = next(context)
         except StopIteration as exc:
@@ -306,6 +310,9 @@ def parse_nmap_xml(path: Path) -> Tuple[ScanMetadata, List[Host]]:
         raise ParserError(f"Invalid XML in {path.name}: {exc}") from exc
     except OSError as exc:
         raise ParserError(f"Could not read {path.name}: {exc}") from exc
+    finally:
+        if source is not None:
+            source.close()
 
     if not hosts:
         LOG.warning("Scan contained no host records with IP addresses (empty scan?)")
