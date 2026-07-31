@@ -1,5 +1,15 @@
 # Changelog
 
+## v1.3.0 - packaging, preflight, and manual updates (in progress)
+
+- Added authoritative PEP 517/621 metadata in `pyproject.toml` and the
+  `nmap-flow-analyzer` console entry point.
+- Separated runtime dependencies from development and build tooling.
+- Preserved v1.2.5 analyzer behavior while beginning platform-specific
+  packaging and release automation.
+- Release status remains a Linux release candidate; full Windows artifact
+  validation is a required external gate before final cross-platform release.
+
 ## v1.2.5 - Windows logging-lifecycle portability hotfix
 
 - Analyzer-created console and `execution.log` handlers are now explicitly

@@ -10,12 +10,26 @@ That sentence appears in every generated report because it is the single most im
 
 Requires Python 3.9+.
 
+For a normal isolated Python tool installation:
+
+```bash
+pipx install .
+nmap-flow-analyzer --help
+```
+
+For development:
+
 ```bash
 cd nmap-flow-analyzer
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+python -m pip install -e ".[dev]"
+python -m pytest -q
 ```
+
+`pyproject.toml` is the authoritative source for package metadata and
+dependencies. `requirements.txt` is retained as a compatible runtime-only
+mirror for legacy and closed-network installation workflows.
 
 Optional, for SVG/PNG diagram rendering (the `.dot` and `.mmd` sources are always written even without it):
 

@@ -53,7 +53,7 @@ def test_repeated_runs_do_not_accumulate_handlers_or_duplicate_lines():
         assert not _analyzer_file_handlers()
         for output in (first, second):
             text = (output / "execution.log").read_text(encoding="utf-8")
-            assert text.count("nmap-flow-analyzer 1.2.5 starting") == 1
+            assert text.count("nmap-flow-analyzer 1.3.0 starting") == 1
             shutil.rmtree(output)
 
 
