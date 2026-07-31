@@ -1,0 +1,1 @@
+sudo nmap -Pn -sS -sU -p- -T3 -A --version-all --osscan-guess --reason -R --script "(default or safe or discovery or version or vuln or intrusive) and not (dos or exploit or brute or fuzzer or external)" --script-timeout 3m --stats-every 30s -oA full-scan 192.168.1.0/24
