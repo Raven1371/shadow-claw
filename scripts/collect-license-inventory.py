@@ -16,6 +16,7 @@ import tempfile
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.request import urlopen
 
 
 def run(*args: str) -> str:
@@ -30,10 +31,55 @@ def is_elf(path: Path) -> bool:
 
 
 LICENSE_NAME = re.compile(r"^(copying|copyright|licen[cs]e|notice)([._-].*)?$", re.I)
+ROCKY_SOURCE_RPM_VAULT = {
+    # Rocky 9's current repositories no longer expose the source matching the
+    # libstdc++ preinstalled in the rockylinux:9 container. This immutable
+    # official Rocky 9.3 vault object is selected only after SOURCERPM matches.
+    "gcc-11.4.1-2.1.el9.src.rpm":
+        "https://dl.rockylinux.org/vault/rocky/9.3/BaseOS/source/tree/Packages/g/"
+        "gcc-11.4.1-2.1.el9.src.rpm",
+}
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def symlink_chain(path: Path) -> list[str]:
+    chain, current = [], path
+    for _ in range(40):
+        chain.append(str(current))
+        if not current.is_symlink():
+            return chain
+        target = Path(current.readlink())
+        current = target if target.is_absolute() else current.parent / target
+    raise RuntimeError(f"symlink chain is cyclic or too deep: {path}")
+
+
+def parse_ldconfig(output: str, soname: str) -> list[Path]:
+    paths = []
+    for line in output.splitlines():
+        match = re.match(r"\s*(\S+)\s+\([^)]*\)\s+=>\s+(\S+)\s*$", line)
+        if match and match.group(1) == soname:
+            paths.append(Path(match.group(2)))
+    return paths
+
+
+def require_exact_file(paths: list[Path], expected: str) -> Path:
+    matches = [path for path in paths if path.name == expected]
+    if len(matches) != 1:
+        raise RuntimeError(f"expected exactly one {expected}, got {len(matches)}")
+    return matches[0]
+
+
+def verify_rpm_signature(output: str) -> None:
+    if "signatures ok" not in output.lower():
+        raise RuntimeError(f"RPM signature was not verified: {output}")
+
+
+def verify_same_file(source: Path, bundled: Path) -> None:
+    if sha256(source.resolve()) != sha256(bundled):
+        raise RuntimeError("bundled-file hash mismatch with canonical package file")
 
 
 def exact_source_rpm_evidence(package: str, bundle: Path) -> tuple[list[Path], dict[str, str]]:
@@ -49,17 +95,27 @@ def exact_source_rpm_evidence(package: str, bundle: Path) -> tuple[list[Path], d
         )
         matches = list(tmp.glob("*.src.rpm"))
         exact = [p for p in matches if p.name == source_rpm]
+        repository = "Rocky Linux configured DNF source repository: " + download.stdout.strip()
+        if len(exact) != 1 and source_rpm in ROCKY_SOURCE_RPM_VAULT:
+            url = ROCKY_SOURCE_RPM_VAULT[source_rpm]
+            destination = tmp / source_rpm
+            with urlopen(url, timeout=120) as response, destination.open("wb") as output:
+                shutil.copyfileobj(response, output)
+            exact = [destination]
+            repository = url
         if len(exact) != 1:
             raise RuntimeError(
                 f"{package}: expected exact source RPM {source_rpm}, got "
                 + ", ".join(p.name for p in matches)
             )
-        srpm = exact[0]
+        srpm = require_exact_file(exact, source_rpm)
         signature = subprocess.run(
             ("rpmkeys", "--checksig", str(srpm)), check=True, text=True, capture_output=True
         ).stdout.strip()
-        if "pgp" not in signature.lower() or "ok" not in signature.lower():
-            raise RuntimeError(f"{source_rpm}: RPM signature was not verified: {signature}")
+        try:
+            verify_rpm_signature(signature)
+        except RuntimeError as exc:
+            raise RuntimeError(f"{source_rpm}: {exc}") from exc
         extracted = tmp / "extracted"
         extracted.mkdir()
         rpm2cpio = subprocess.Popen(("rpm2cpio", str(srpm)), stdout=subprocess.PIPE)
@@ -112,7 +168,7 @@ def exact_source_rpm_evidence(package: str, bundle: Path) -> tuple[list[Path], d
         return copied, {
             "source_rpm": source_rpm,
             "source_rpm_sha256": sha256(srpm),
-            "repository": "Rocky Linux configured DNF source repository: " + download.stdout.strip(),
+            "repository": repository,
             "rpm_signature_verification": signature,
             "license_source_type": "exact-signed-source-rpm",
             "retrieval_timestamp_utc": datetime.now(timezone.utc).isoformat(),
@@ -279,8 +335,10 @@ def main() -> int:
             "license_evidence": license_paths, "classification": "runtime",
             **source_provenance,
         }
-        if sha256(shipped) != sha256(candidate.resolve()):
-            failures.append(rel + " (bundled-file hash mismatch with canonical package file)")
+        try:
+            verify_same_file(candidate, shipped)
+        except RuntimeError as exc:
+            failures.append(rel + f" ({exc})")
             continue
         provenance_dir = native_licenses / package / "provenance"
         provenance_dir.mkdir(parents=True, exist_ok=True)
@@ -288,6 +346,7 @@ def main() -> int:
         provenance.write_text(json.dumps({
             "library_soname": shipped.name,
             "canonical_source_path": str(candidate.resolve()),
+            "symbolic_link_chain": symlink_chain(candidate),
             "source_file_sha256": sha256(candidate.resolve()),
             "bundled_file_path": rel,
             "bundled_file_sha256": sha256(shipped),
