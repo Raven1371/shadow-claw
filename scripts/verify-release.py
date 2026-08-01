@@ -30,7 +30,7 @@ def main() -> int:
     expected = {item["filename"]: item for item in payload.get("artifacts", [])}
     actual = {
         path.name: path for path in args.directory.iterdir()
-        if path.is_file() and path.name not in {"SHA256SUMS.txt", "release-artifacts.json"}
+        if path.is_file() and path.name not in {"SHA256SUMS.txt", "release-manifest.json"}
     }
     for name in sorted(expected.keys() - actual.keys()):
         errors.append(f"missing artifact: {name}")

@@ -10,9 +10,14 @@ out="$root/dist-linux-$platform"
 rm -rf "$work" "$out"
 mkdir -p "$work" "$out"
 
+license_args=(
+  --add-data "$root/LICENSE:." --add-data "$root/NOTICE:."
+  --add-data "$root/THIRD_PARTY_NOTICES.md:." --add-data "$root/licenses:licenses"
+)
+
 python3 -m PyInstaller --clean --noconfirm --onedir --name nmap-flow-analyzer \
   --distpath "$work/onedir" --workpath "$work/pyinstaller-work" \
-  --specpath "$work" "$root/nmap_flow_analyzer.py"
+  --specpath "$work" "${license_args[@]}" "$root/nmap_flow_analyzer.py"
 graphviz_lib=$(pkg-config --variable=libdir libgvc 2>/dev/null || true)
 if [[ -z "$graphviz_lib" || ! -d "$graphviz_lib/graphviz" ]]; then
   graphviz_plugin_dir=$(find /usr/lib /usr/lib64 -type d -path '*/graphviz' -print -quit 2>/dev/null || true)
@@ -20,7 +25,7 @@ if [[ -z "$graphviz_lib" || ! -d "$graphviz_lib/graphviz" ]]; then
 fi
 onefile_args=(--clean --noconfirm --onefile --name nmap-flow-analyzer
   --distpath "$work/onefile" --workpath "$work/pyinstaller-onefile"
-  --specpath "$work" --add-binary "$(command -v dot):graphviz/bin")
+  --specpath "$work" "${license_args[@]}" --add-binary "$(command -v dot):graphviz/bin")
 if [[ -n "$graphviz_lib" && -d "$graphviz_lib/graphviz" ]]; then
   onefile_args+=(--add-data "$graphviz_lib/graphviz:graphviz/lib/graphviz")
 fi
@@ -57,6 +62,10 @@ done
 cp -a "$root/examples" "$bundle/"
 cp "$root/network_config.example.yaml" "$root/README.md" "$root/CHANGELOG.md" "$bundle/"
 cp -a "$root/docs/." "$bundle/docs/"
+cp "$root/LICENSE" "$root/NOTICE" "$root/THIRD_PARTY_NOTICES.md" "$bundle/"
+rm -rf "$bundle/licenses"
+cp -a "$root/licenses" "$bundle/licenses"
+python3 "$root/scripts/collect-license-inventory.py" --platform "$platform" --bundle "$bundle"
 
 tar -C "$work/bundle" -czf \
   "$out/nmap-flow-analyzer-$release_version-$platform-x64-portable.tar.gz" \
@@ -64,4 +73,6 @@ tar -C "$work/bundle" -czf \
 cp "$work/onefile/nmap-flow-analyzer" \
   "$out/nmap-flow-analyzer-$release_version-$platform-x64"
 chmod 0755 "$out/nmap-flow-analyzer-$release_version-$platform-x64"
+cp "$bundle/licenses/NATIVE_DEPENDENCY_INVENTORY.json" \
+  "$out/nmap-flow-analyzer-$release_version-$platform-x64.license-inventory.json"
 printf '%s\n' "$bundle"

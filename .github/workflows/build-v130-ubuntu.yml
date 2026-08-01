@@ -10,6 +10,13 @@ on:
       - "scripts/package-linux-portable.sh"
       - "scripts/try-build-appimage.sh"
       - "scripts/smoke-test-package.py"
+      - "scripts/collect-license-inventory.py"
+      - "scripts/validate-license-payload.py"
+      - "LICENSE"
+      - "NOTICE"
+      - "THIRD_PARTY_NOTICES.md"
+      - "licenses/**"
+      - "requirements*.lock"
       - ".github/workflows/build-v130-ubuntu.yml"
 
 permissions:
@@ -32,8 +39,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y graphviz libgraphviz-dev pkg-config dpkg-dev curl
-          python -m pip install --upgrade pip
-          python -m pip install -e ".[dev]" pyinstaller
+          python -m pip install -r requirements-dev.lock
+          python -m pip install --no-deps -e .
       - name: Test current v1.3.0 source
         run: |
           python -m compileall -q nmap_flow_analyzer
@@ -49,6 +56,10 @@ jobs:
           python run_tests.py
       - name: Build portable, onefile, and DEB
         run: bash scripts/build-ubuntu.sh
+      - name: Validate license payload and native attribution
+        run: |
+          python scripts/validate-license-payload.py build/linux-ubuntu/bundle/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64
+          dpkg-deb --contents dist-linux-ubuntu/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64.deb | grep '/usr/share/doc/nmap-flow-analyzer/LICENSE'
       - name: Smoke-test portable and onefile
         run: |
           mkdir -p build/smoke-portable
@@ -67,23 +78,21 @@ jobs:
             --examples examples --config network_config.example.yaml --require-graphviz
           sudo dpkg -r nmap-flow-analyzer
           test ! -e /usr/bin/nmap-flow-analyzer
-      - name: Attempt and test AppImage
+      - name: Build, inspect, and test AppImage
         id: appimage
-        continue-on-error: true
         run: |
           bash scripts/try-build-appimage.sh ubuntu
+          test "$(python -c 'import json; print(json.load(open("dist-linux-ubuntu/appimage-tool-provenance.json"))["sha256"])')" = df3baf5ca5facbecfc2f3fa6713c29ab9cefa8fd8c1eac5d283b79cab33e4acb
+          python scripts/validate-license-payload.py build/linux-ubuntu/AppDir/opt/nmap-flow-analyzer
           APPIMAGE_EXTRACT_AND_RUN=1 python scripts/smoke-test-package.py \
             --command dist-linux-ubuntu/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64.AppImage \
             --examples examples --config network_config.example.yaml --require-graphviz
-      - name: Record AppImage status
-        run: |
-          echo "AppImage result: ${{ steps.appimage.outcome }}" | tee build/appimage-status.txt
       - uses: actions/upload-artifact@v4
         with:
           name: v130-rc1-ubuntu-x64-${{ github.run_id }}
           path: |
             dist-linux-ubuntu/*
             build/deb-file-list.txt
-            build/appimage-status.txt
+            dist-linux-ubuntu/*.license-inventory.json
             build/ubuntu-skip-report.*
           if-no-files-found: error
