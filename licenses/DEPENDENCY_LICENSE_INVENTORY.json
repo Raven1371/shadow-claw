@@ -60,6 +60,43 @@
       "evidence": "PyInstaller 6.21.0 COPYING.txt and installed metadata", "release_blocker": false
     },
     {
+      "name": "Rocky libstdc++.so.6", "version": "11.4.1-2.1.el9", "identifier": "libstdc++-11.4.1-2.1.el9.x86_64",
+      "library_filename": "libstdc++.so.6", "owning_package": "libstdc++", "source_rpm": "gcc-11.4.1-2.1.el9.src.rpm",
+      "source_rpm_sha256": "179136696b4a635c7e500ba982464c16c2ea8ce1349d05270812fdb88532cb2a",
+      "upstream": "https://gcc.gnu.org/", "license": "GPLv3+ and GPLv3+ with exceptions and GPLv2+ with exceptions and LGPLv2+ and BSD",
+      "classification": "runtime-redistributed", "artifacts": ["rhel-portable", "rhel-onefile", "rpm", "rhel-appimage"],
+      "required_notice_files": ["licenses/native-libraries/libstdc++/000-COPYING", "licenses/native-libraries/libstdc++/001-COPYING.LIB", "licenses/native-libraries/libstdc++/002-COPYING.RUNTIME"],
+      "evidence": "exact owning RPM, byte-identical source/bundle SHA-256, signed exact Rocky 9.3 vault source RPM, extracted license texts and provenance record",
+      "verification_method": "rpm ownership and metadata; exact signed source-RPM fallback; SHA-256 equality", "provenance_status": "verified", "release_blocker": false
+    },
+    {
+      "name": "Rocky libxcb.so.1", "version": "1.13.1-9.el9", "identifier": "libxcb-1.13.1-9.el9.x86_64",
+      "library_filename": "libxcb.so.1", "owning_package": "libxcb", "source_rpm": "libxcb-1.13.1-9.el9.src.rpm",
+      "source_rpm_sha256": "adf125624ea3f2f99fc094c8857c1b935df02836879e5c0f1b790887de2f5503",
+      "upstream": "https://xcb.freedesktop.org/", "license": "MIT", "classification": "runtime-redistributed",
+      "artifacts": ["rhel-portable", "rhel-onefile", "rpm", "rhel-appimage"], "required_notice_files": ["licenses/native-libraries/libxcb/000-COPYING"],
+      "evidence": "exact owning RPM, byte-identical source/bundle SHA-256, signed exact Rocky source RPM, extracted COPYING and provenance record",
+      "verification_method": "rpm ownership and metadata; exact signed source-RPM fallback; SHA-256 equality", "provenance_status": "verified", "release_blocker": false
+    },
+    {
+      "name": "Rocky libxcb-render.so.0", "version": "1.13.1-9.el9", "identifier": "libxcb-1.13.1-9.el9.x86_64",
+      "library_filename": "libxcb-render.so.0", "owning_package": "libxcb", "source_rpm": "libxcb-1.13.1-9.el9.src.rpm",
+      "source_rpm_sha256": "adf125624ea3f2f99fc094c8857c1b935df02836879e5c0f1b790887de2f5503",
+      "upstream": "https://xcb.freedesktop.org/", "license": "MIT", "classification": "runtime-redistributed",
+      "artifacts": ["rhel-portable", "rhel-onefile", "rpm", "rhel-appimage"], "required_notice_files": ["licenses/native-libraries/libxcb/000-COPYING"],
+      "evidence": "exact owning RPM, byte-identical source/bundle SHA-256, signed exact Rocky source RPM, extracted COPYING and provenance record",
+      "verification_method": "rpm ownership and metadata; exact signed source-RPM fallback; SHA-256 equality", "provenance_status": "verified", "release_blocker": false
+    },
+    {
+      "name": "Rocky libxcb-shm.so.0", "version": "1.13.1-9.el9", "identifier": "libxcb-1.13.1-9.el9.x86_64",
+      "library_filename": "libxcb-shm.so.0", "owning_package": "libxcb", "source_rpm": "libxcb-1.13.1-9.el9.src.rpm",
+      "source_rpm_sha256": "adf125624ea3f2f99fc094c8857c1b935df02836879e5c0f1b790887de2f5503",
+      "upstream": "https://xcb.freedesktop.org/", "license": "MIT", "classification": "runtime-redistributed",
+      "artifacts": ["rhel-portable", "rhel-onefile", "rpm", "rhel-appimage"], "required_notice_files": ["licenses/native-libraries/libxcb/000-COPYING"],
+      "evidence": "exact owning RPM, byte-identical source/bundle SHA-256, signed exact Rocky source RPM, extracted COPYING and provenance record",
+      "verification_method": "rpm ownership and metadata; exact signed source-RPM fallback; SHA-256 equality", "provenance_status": "verified", "release_blocker": false
+    },
+    {
       "name": "Graphviz and native dependencies", "version": "recorded per platform build",
       "identifier": "dpkg/rpm package ownership", "upstream": "https://graphviz.org/",
       "license": "determined per exact installed package", "copyright": "recorded in copied package evidence",
