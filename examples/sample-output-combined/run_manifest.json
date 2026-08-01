@@ -1,0 +1,420 @@
+{
+  "application": "nmap-flow-analyzer",
+  "version": "1.2.4",
+  "run_id": "ea421da03123",
+  "started_at": "2026-07-22T05:55:04",
+  "completed_at": "2026-07-22T05:55:05",
+  "input_file": "examples/sample-scan.xml",
+  "generated_files": [
+    {
+      "path": "analysis_report.html",
+      "size": 75787,
+      "sha256": "52b75080c6d0f22797a2af28602114407c37968a6fd0af8b5fe4893efb496fa7"
+    },
+    {
+      "path": "correlation_findings.csv",
+      "size": 5022,
+      "sha256": "7557da9415cf20665c25e0c98c9d063cc17f2ca2935b7f3d23b311f6fe93b0bc"
+    },
+    {
+      "path": "correlation_findings.json",
+      "size": 8037,
+      "sha256": "e1cdc23b2d9f60f802724162a3bd5c3129032dae53e1fa29d3edaec6df0a7f29"
+    },
+    {
+      "path": "data_flow_diagram.dot",
+      "size": 3818,
+      "sha256": "cb6270500b74f2d095d192be01c9d2204b25c8f9ffa36360bc1a97276c061e67"
+    },
+    {
+      "path": "data_flow_diagram.mmd",
+      "size": 2605,
+      "sha256": "315bd893954eba892e9a9a70c3dab4f0f79848debbf4dab8759fe31bfc1b0f3d"
+    },
+    {
+      "path": "data_flow_diagram.png",
+      "size": 156078,
+      "sha256": "3deff2ced4d36e8978dd37eb1a2cbc71122affb29400b1a00e7eaa64102a3dba"
+    },
+    {
+      "path": "data_flow_diagram.svg",
+      "size": 18305,
+      "sha256": "a37954125339ba76d9ae863588e90648920d0bce03ce59d83440b842fb931c3d"
+    },
+    {
+      "path": "external_dependencies.csv",
+      "size": 832,
+      "sha256": "5e04167c7470ff7aadc325748f86d4766f6719f5599a51404f61df1aca4f9e49"
+    },
+    {
+      "path": "external_dependencies.json",
+      "size": 1281,
+      "sha256": "f5b8b53c757c4c39ce25a91bceac584ac69617215724c572345d37385a8e7e7e"
+    },
+    {
+      "path": "findings_summary.md",
+      "size": 6976,
+      "sha256": "b57ff5a367b023a8619785400734e4c14dbb5f46db691a162de3fd83313f9276"
+    },
+    {
+      "path": "firewall_exceptions.xlsx",
+      "size": 28629,
+      "sha256": "d5aad38c0b96532c030f3343ddceccebd280a392d8926b48f9e146c6366d3201"
+    },
+    {
+      "path": "inbound_exceptions.csv",
+      "size": 9424,
+      "sha256": "5e44f93394fac9edac6e9f9cd22087b06085b919c8c4e95933cb0f95717148c0"
+    },
+    {
+      "path": "inbound_exceptions.json",
+      "size": 24555,
+      "sha256": "57ffd9009420f35ff0261112571010e731fde95fec255ca67a52e93ad1259581"
+    },
+    {
+      "path": "manual_review.csv",
+      "size": 3570,
+      "sha256": "e43841d775a5de975396e7f617a7397359b6394e3c2effec21a02701d085b4fc"
+    },
+    {
+      "path": "normalized_data.json",
+      "size": 142691,
+      "sha256": "65d6a50ee3dca060dd4f4026a700fde8c54bedbdf3550a9042392dbdcb20b837"
+    },
+    {
+      "path": "outbound_exceptions.csv",
+      "size": 3040,
+      "sha256": "ec27d02cb07bbf04e06429a5f77ccbb37a36eb7074df15833de9854c151faecc"
+    },
+    {
+      "path": "outbound_exceptions.json",
+      "size": 5411,
+      "sha256": "2311ad447ed3e80eb73353ae36b63aca881983a2b49c833025e0810928585ba8"
+    },
+    {
+      "path": "service_inventory.csv",
+      "size": 5824,
+      "sha256": "7af2b512e1e45951232c7cade139c628aab5b818485a61d927a3287598ad939d"
+    },
+    {
+      "path": "service_inventory.json",
+      "size": 15987,
+      "sha256": "bde72e106039a45662f24301b5c58df65054eef5d627ff2c340a3287037ab52c"
+    },
+    {
+      "path": "zeek_input_summary.json",
+      "size": 7305,
+      "sha256": "c6c6b368152c30dd7ded0e96bf9d41500470d8c4ba5b51f2bad77338a3117cb2"
+    },
+    {
+      "path": "zeek_observed_flows.csv",
+      "size": 1872,
+      "sha256": "d92c91ff8fd8dcc87f3589358f71d3c5ba1bced12488128c6f8e667ff7513ab8"
+    },
+    {
+      "path": "zeek_observed_flows.json",
+      "size": 7452,
+      "sha256": "a11ffc880ef2ce0d28573c20da27a6eda740a9518a409f3d250a8cbf5d3502d7"
+    }
+  ],
+  "graphviz": {
+    "available": true,
+    "svg_rendered": true,
+    "png_rendered": true,
+    "error": null
+  },
+  "excel_requested": true,
+  "excel_generated": true,
+  "spreadsheet_sanitization": true,
+  "zeek": {
+    "requested": true,
+    "active": true,
+    "input_directories": [
+      "examples/zeek-sample"
+    ],
+    "files_processed": [
+      {
+        "file": "conn.log",
+        "log_type": "conn",
+        "format": "json",
+        "size": 3293,
+        "records": 9,
+        "malformed": 0,
+        "data_records_seen": 9
+      },
+      {
+        "file": "known_hosts.log",
+        "log_type": "known_hosts",
+        "format": "json",
+        "size": 138,
+        "records": 3,
+        "malformed": 0,
+        "data_records_seen": 3
+      },
+      {
+        "file": "known_services.log",
+        "log_type": "known_services",
+        "format": "json",
+        "size": 216,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "file": "software.log",
+        "log_type": "software",
+        "format": "json",
+        "size": 273,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "file": "x509.log",
+        "log_type": "x509",
+        "format": "json",
+        "size": 816,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "file": "known_certs.log",
+        "log_type": "known_certs",
+        "format": "json",
+        "size": 142,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "files.log",
+        "log_type": "files",
+        "format": "json",
+        "size": 178,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "notice.log",
+        "log_type": "notice",
+        "format": "json",
+        "size": 204,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "weird.log",
+        "log_type": "weird",
+        "format": "json",
+        "size": 334,
+        "records": 3,
+        "malformed": 0,
+        "data_records_seen": 3
+      },
+      {
+        "file": "dns.log",
+        "log_type": "dns",
+        "format": "json",
+        "size": 444,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "file": "ssl.log",
+        "log_type": "ssl",
+        "format": "json",
+        "size": 306,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "capture_loss.log",
+        "log_type": "capture_loss",
+        "format": "json",
+        "size": 102,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "reporter.log",
+        "log_type": "reporter",
+        "format": "json",
+        "size": 124,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      }
+    ],
+    "log_types_found": [
+      "capture_loss",
+      "conn",
+      "dns",
+      "files",
+      "known_certs",
+      "known_hosts",
+      "known_services",
+      "notice",
+      "reporter",
+      "software",
+      "ssl",
+      "weird",
+      "x509"
+    ],
+    "record_counts": {
+      "conn": 9,
+      "known_hosts": 3,
+      "known_services": 2,
+      "software": 2,
+      "x509": 2,
+      "known_certs": 1,
+      "files": 1,
+      "notice": 1,
+      "weird": 3,
+      "dns": 2,
+      "ssl": 1,
+      "capture_loss": 1,
+      "reporter": 1
+    },
+    "malformed_record_counts": {},
+    "log_type_summaries": [
+      {
+        "log_type": "conn",
+        "files_processed": 1,
+        "records": 9,
+        "malformed": 0,
+        "data_records_seen": 9
+      },
+      {
+        "log_type": "known_hosts",
+        "files_processed": 1,
+        "records": 3,
+        "malformed": 0,
+        "data_records_seen": 3
+      },
+      {
+        "log_type": "known_services",
+        "files_processed": 1,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "log_type": "software",
+        "files_processed": 1,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "log_type": "x509",
+        "files_processed": 1,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "log_type": "known_certs",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "log_type": "files",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1,
+        "samples_retained": 1,
+        "samples_truncated": 0,
+        "sample_scope": "global_across_log_type"
+      },
+      {
+        "log_type": "notice",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1,
+        "samples_retained": 1,
+        "samples_truncated": 0,
+        "sample_scope": "global_across_log_type"
+      },
+      {
+        "log_type": "weird",
+        "files_processed": 1,
+        "records": 3,
+        "malformed": 0,
+        "data_records_seen": 3
+      },
+      {
+        "log_type": "dns",
+        "files_processed": 1,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "log_type": "ssl",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "log_type": "capture_loss",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "log_type": "reporter",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      }
+    ],
+    "raw_records_read": {
+      "conn": 9,
+      "known_hosts": 3,
+      "known_services": 2,
+      "software": 2,
+      "x509": 2,
+      "known_certs": 1,
+      "files": 1,
+      "notice": 1,
+      "weird": 3,
+      "dns": 2,
+      "ssl": 1,
+      "capture_loss": 1,
+      "reporter": 1
+    },
+    "usable_records": {
+      "conn": 9,
+      "known_hosts": 3,
+      "known_services": 2,
+      "software": 2,
+      "x509": 2,
+      "known_certs": 1,
+      "files": 1,
+      "notice": 1,
+      "weird": 3,
+      "dns": 2,
+      "ssl": 1,
+      "capture_loss": 1,
+      "reporter": 1
+    },
+    "earliest_timestamp": "2026-07-20T08:00:10+00:00",
+    "latest_timestamp": "2026-07-20T08:02:10+00:00",
+    "sensor_health": "degraded",
+    "artifacts_generated": true,
+    "warnings": []
+  }
+}

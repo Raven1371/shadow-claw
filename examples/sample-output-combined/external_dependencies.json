@@ -1,0 +1,55 @@
+[
+  {
+    "originator": "192.168.20.15",
+    "responder": "203.0.113.50",
+    "protocol": "tcp",
+    "responder_port": 443,
+    "ip_version": 4,
+    "services": [
+      "ssl"
+    ],
+    "originator_ports_seen": 1,
+    "originator_port_min": 51000,
+    "originator_port_max": 51000,
+    "first_seen": "2026-07-20T08:00:40+00:00",
+    "last_seen": "2026-07-20T08:00:40+00:00",
+    "connection_count": 1,
+    "successful_count": 1,
+    "failed_count": 0,
+    "rejected_count": 0,
+    "one_way_count": 0,
+    "partial_count": 0,
+    "ambiguous_count": 0,
+    "originator_bytes": 2400,
+    "responder_bytes": 95000,
+    "originator_ip_bytes": 900,
+    "responder_ip_bytes": 1200,
+    "originator_packets": 30,
+    "responder_packets": 80,
+    "total_duration": 1.0,
+    "max_duration": 1.0,
+    "conn_states": [
+      "SF"
+    ],
+    "missed_bytes": 0,
+    "sample_uids": [
+      "Cwsext1"
+    ],
+    "tunnel_parents": [],
+    "vlans": [],
+    "community_ids": [],
+    "scanner_traffic": false,
+    "ignored_by_config": false,
+    "sensor_quality": "ok",
+    "outcome_label": "successful",
+    "dns_names": [],
+    "protocol_confirmations": [],
+    "tls_server_names": [
+      "updates.example.com"
+    ],
+    "http_hosts": [],
+    "enrichment_notes": [
+      "TLS TLSv1.3"
+    ]
+  }
+]

@@ -1,0 +1,25 @@
+%% Network data-flow diagram (Nmap-derived)
+%% Scan origin: 192.168.1.50; started: Mon Jul  1 10:00:00 2026
+%% This report describes services and reachability observed from the Nmap scanner’s location. It does not independently prove normal production communications between all listed systems.
+%% Solid = Observed, dash 6-4 = Inferred, dash 2-4 = User-Defined,
+%% dash 10-4 = Unknown / Manual Review Required
+flowchart LR
+  subgraph zone0["Zone: Management"]
+    n_192_168_1_50["sec-scan01#92;<br/>192.168.1.50"]
+  end
+  subgraph zone1["Zone: Servers"]
+    n_192_168_10_10["dc01.example.local<br/>192.168.10.10<br/>Microsoft Windows Server 2019<br/>Domain controller #40;100%#41;"]
+    n_192_168_10_20["web01.example.local<br/>192.168.10.20<br/>Linux 5.15<br/>Web server #40;100%#41;"]
+    n_192_168_10_30["db01.example.local<br/>192.168.10.30<br/>Linux 5.15<br/>Database server #40;100%#41;"]
+    n_192_168_10_40["legacy01.example.local<br/>192.168.10.40<br/>Microsoft Windows 7"]
+  end
+  n_192_168_1_50 -->|"tcp/389 LDAP<br/>tcp/445 SMB<br/>tcp/53 DNS<br/>tcp/88 Kerberos<br/>udp/53 DNS"| n_192_168_10_10
+  n_192_168_1_50 -->|"tcp/22 SSH<br/>tcp/443 HTTPS"| n_192_168_10_20
+  n_192_168_1_50 -->|"tcp/5432 PostgreSQL"| n_192_168_10_30
+  n_192_168_1_50 -->|"tcp/23 Telnet<br/>tcp/445 SMB<br/>tcp/9100 Raw Print"| n_192_168_10_40
+  n_192_168_10_20 -->|"tcp/5432 PostgreSQL"| n_192_168_10_30
+  linkStyle 0 stroke:#24292f
+  linkStyle 1 stroke:#24292f
+  linkStyle 2 stroke:#24292f
+  linkStyle 3 stroke:#24292f
+  linkStyle 4 stroke:#1a7f37,stroke-dasharray:2 4

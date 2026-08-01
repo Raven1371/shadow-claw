@@ -1,0 +1,9 @@
+Package: nmap-flow-analyzer
+Version: 1.3.0~rc1
+Section: admin
+Priority: optional
+Architecture: amd64
+Maintainer: Shadow Claw Project
+Description: Offline network analysis and security investigation
+ Produces human-reviewed network, evidence, diagram, and candidate firewall
+ reports without telemetry or automatic enforcement.

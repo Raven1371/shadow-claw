@@ -1,0 +1,2 @@
+{"ts": 1784534420.0, "uid": "Cwsdns1", "id.orig_h": "192.168.20.15", "id.resp_h": "192.168.1.10", "query": "updates.example.com", "qtype_name": "A", "rcode_name": "NOERROR", "answers": ["203.0.113.50"], "rejected": false}
+{"ts": 1784534425.0, "uid": "Cwsdns2", "id.orig_h": "192.168.20.15", "id.resp_h": "192.168.1.10", "query": "db01.example.local", "qtype_name": "A", "rcode_name": "NOERROR", "answers": ["192.168.10.30"], "rejected": false}

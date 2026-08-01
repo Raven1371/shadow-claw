@@ -1,0 +1,3 @@
+# Install the project and its authoritative development dependency set.
+-e .[dev]
+

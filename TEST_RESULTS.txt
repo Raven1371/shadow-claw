@@ -1,0 +1,127 @@
+nmap-flow-analyzer v1.2.4 - test results
+========================================
+
+Commands
+--------
+Both commands are present in this archive and run the same suite:
+
+    python -m pytest -q          # standard; requires pytest installed
+    python run_tests.py          # shipped runner; standard library only
+
+Focused runs used during this release:
+
+    python -m pytest -q tests/test_zeek_parser.py
+    python -m pytest -q tests/test_zeek_integration.py
+    python -m pytest -q tests/test_zeek_v122_regressions.py
+    python -m pytest -q tests/test_zeek_v123_regressions.py
+    python -m pytest -q tests/test_zeek_v124_regressions.py
+
+    python run_tests.py tests/test_zeek_parser.py
+    python run_tests.py tests/test_zeek_v124_regressions.py
+
+Compile check:
+
+    python -m compileall nmap_flow_analyzer      (clean)
+
+Environment caveat (please read)
+--------------------------------
+pytest could NOT be installed in the environment where this release was
+built: the host has no network access, so "pip install pytest" fails
+(PEP 668 / no index reachable). The results below were produced with
+"python run_tests.py", shipped in this archive. It imports each
+tests/test_*.py module and runs every module-level test_ function with the
+same pass/fail semantics this suite relies on, and provides a minimal pytest
+shim (skip, raises, mark, fail) when pytest is absent. The tests are ordinary
+pytest tests, so "python -m pytest -q" runs the identical suite where pytest
+is available.
+
+Full suite
+----------
+$ python run_tests.py
+
+403 collected, 403 passed, 0 failed, 0 skipped
+
+Per-module (Zeek + new)
+-----------------------
+tests/test_zeek_parser.py            21 collected, 21 passed, 0 failed
+tests/test_zeek_aggregation.py       18 collected, 18 passed, 0 failed
+tests/test_zeek_correlation.py       25 collected, 25 passed, 0 failed
+tests/test_zeek_rules_and_outputs.py 19 collected, 19 passed, 0 failed
+tests/test_zeek_integration.py       53 collected, 53 passed, 0 failed
+tests/test_zeek_v122_regressions.py  31 collected, 31 passed, 0 failed
+tests/test_zeek_v123_regressions.py  42 collected, 42 passed, 0 failed
+tests/test_zeek_v124_regressions.py  24 collected, 24 passed, 0 failed
+
+Baseline comparison
+-------------------
+v1.2.3 baseline measured before any change:  379 collected, 379 passed
+v1.2.4 final:                                403 collected, 403 passed
+New in v1.2.4: 24 regression tests (tests/test_zeek_v124_regressions.py).
+Pre-existing assertions updated: version literals 1.2.3 -> 1.2.4 only.
+
+Issue 1 - execution-log pluralization
+-------------------------------------
+Message sites corrected (all now via the shared pluralize helpers):
+  parser.py               "Parsed N hosts from ..."
+  config.py               "Loaded configuration ... (N zones, N hosts)"
+  flow_analysis.py        "Built N flows and N manual-review items"
+  firewall_rules.py       "Generated N candidate inbound/outbound rules"
+  role_inference.py       "Database service(s) open" -> service/services
+  zeek_correlation.py     partial/ambiguous observation reasons
+  cli.py                  "Zeek: N aggregated flows, N correlation findings,
+                           N external dependency/dependencies, ..."
+Generated execution.log and CLI stdout scanned for (s), (ies), was/were,
+host(s), service(s), flow(s), communication(s), dependenc(ies), item(s),
+rule(s), zone(s), finding(s), observation(s), aggregate(s), endpoint(s),
+record(s), file(s), directorie(s): NONE present in either sample run.
+
+Issue 2 - strict TSV detection
+------------------------------
+detect_zeek_format(first_meaningful_line) results:
+  {"...":...}                 -> json
+  #separator \x09             -> tsv     (and every ZEEK_TSV_DIRECTIVES token)
+  #fields ts uid ...          -> tsv
+  #random / #comment          -> indeterminate
+  #separator_fake / #fieldsx  -> indeterminate
+  #                           -> indeterminate
+  ordinary text / [1,2,3]     -> indeterminate
+  "" (blank)                  -> indeterminate
+
+End-to-end (auto mode):
+  #random comment\n...        -> format=indeterminate, usable=0, 1 file entry,
+                                 bounded warning with filename:line, untrusted
+                                 line NOT echoed.
+  #separator_fake\n#fields... -> format=indeterminate, usable=0, 1 file entry.
+  valid Zeek TSV header       -> format=tsv, usable=1.
+  blank-led / BOM JSON        -> format=json, usable=1.
+Explicit selection: --zeek-format json and tsv bypass detection and still
+apply their structural validation.
+
+Firewall behavior unchanged
+---------------------------
+Combined sample rule counts identical to v1.2.3: 10 inbound, 2 outbound.
+Safety invariants re-verified: no rules from conflicting evidence, external
+dependencies, scanner traffic, ICMP; no Any/Any. Record-accounting invariant
+data_records_seen == usable + malformed still holds.
+
+Sample runs
+-----------
+Nmap-only:
+  Hosts parsed: 4
+  Open services: 11
+  Total inbound candidates: 8 (6 with top-level Observed evidence)
+  Total outbound candidates: 1 (0 with top-level Inferred evidence)
+  Manual-review items: 10
+  No Zeek artifacts; Nmap-only disclaimer; unchanged from v1.2.3.
+
+Combined Nmap + Zeek:
+  Hosts parsed: 4
+  Open services: 11
+  Total inbound candidates: 10 (9 with top-level Observed evidence)
+  Total outbound candidates: 2 (0 with top-level Inferred evidence)
+  Manual-review items: 12
+  Zeek unique communications: 6 (4 with successful connections)
+  Communications supported by both Nmap and Zeek (evidence overlap): 1
+  Zeek correlation findings: 15
+  Zeek external dependencies: 1
+  Zeek sensor health: degraded

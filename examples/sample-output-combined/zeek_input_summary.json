@@ -1,0 +1,318 @@
+{
+  "input_metadata": {
+    "input_directories": [
+      "examples/zeek-sample"
+    ],
+    "files_processed": [
+      {
+        "file": "conn.log",
+        "log_type": "conn",
+        "format": "json",
+        "size": 3293,
+        "records": 9,
+        "malformed": 0,
+        "data_records_seen": 9
+      },
+      {
+        "file": "known_hosts.log",
+        "log_type": "known_hosts",
+        "format": "json",
+        "size": 138,
+        "records": 3,
+        "malformed": 0,
+        "data_records_seen": 3
+      },
+      {
+        "file": "known_services.log",
+        "log_type": "known_services",
+        "format": "json",
+        "size": 216,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "file": "software.log",
+        "log_type": "software",
+        "format": "json",
+        "size": 273,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "file": "x509.log",
+        "log_type": "x509",
+        "format": "json",
+        "size": 816,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "file": "known_certs.log",
+        "log_type": "known_certs",
+        "format": "json",
+        "size": 142,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "files.log",
+        "log_type": "files",
+        "format": "json",
+        "size": 178,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "notice.log",
+        "log_type": "notice",
+        "format": "json",
+        "size": 204,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "weird.log",
+        "log_type": "weird",
+        "format": "json",
+        "size": 334,
+        "records": 3,
+        "malformed": 0,
+        "data_records_seen": 3
+      },
+      {
+        "file": "dns.log",
+        "log_type": "dns",
+        "format": "json",
+        "size": 444,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "file": "ssl.log",
+        "log_type": "ssl",
+        "format": "json",
+        "size": 306,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "capture_loss.log",
+        "log_type": "capture_loss",
+        "format": "json",
+        "size": 102,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "file": "reporter.log",
+        "log_type": "reporter",
+        "format": "json",
+        "size": 124,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      }
+    ],
+    "log_types_found": [
+      "capture_loss",
+      "conn",
+      "dns",
+      "files",
+      "known_certs",
+      "known_hosts",
+      "known_services",
+      "notice",
+      "reporter",
+      "software",
+      "ssl",
+      "weird",
+      "x509"
+    ],
+    "record_counts": {
+      "conn": 9,
+      "known_hosts": 3,
+      "known_services": 2,
+      "software": 2,
+      "x509": 2,
+      "known_certs": 1,
+      "files": 1,
+      "notice": 1,
+      "weird": 3,
+      "dns": 2,
+      "ssl": 1,
+      "capture_loss": 1,
+      "reporter": 1
+    },
+    "malformed_counts": {},
+    "raw_records_read": {
+      "conn": 9,
+      "known_hosts": 3,
+      "known_services": 2,
+      "software": 2,
+      "x509": 2,
+      "known_certs": 1,
+      "files": 1,
+      "notice": 1,
+      "weird": 3,
+      "dns": 2,
+      "ssl": 1,
+      "capture_loss": 1,
+      "reporter": 1
+    },
+    "usable_records": {
+      "conn": 9,
+      "known_hosts": 3,
+      "known_services": 2,
+      "software": 2,
+      "x509": 2,
+      "known_certs": 1,
+      "files": 1,
+      "notice": 1,
+      "weird": 3,
+      "dns": 2,
+      "ssl": 1,
+      "capture_loss": 1,
+      "reporter": 1
+    },
+    "samples_retained": {
+      "files": 1,
+      "notice": 1
+    },
+    "samples_truncated": {},
+    "log_type_summaries": [
+      {
+        "log_type": "conn",
+        "files_processed": 1,
+        "records": 9,
+        "malformed": 0,
+        "data_records_seen": 9
+      },
+      {
+        "log_type": "known_hosts",
+        "files_processed": 1,
+        "records": 3,
+        "malformed": 0,
+        "data_records_seen": 3
+      },
+      {
+        "log_type": "known_services",
+        "files_processed": 1,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "log_type": "software",
+        "files_processed": 1,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "log_type": "x509",
+        "files_processed": 1,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "log_type": "known_certs",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "log_type": "files",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1,
+        "samples_retained": 1,
+        "samples_truncated": 0,
+        "sample_scope": "global_across_log_type"
+      },
+      {
+        "log_type": "notice",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1,
+        "samples_retained": 1,
+        "samples_truncated": 0,
+        "sample_scope": "global_across_log_type"
+      },
+      {
+        "log_type": "weird",
+        "files_processed": 1,
+        "records": 3,
+        "malformed": 0,
+        "data_records_seen": 3
+      },
+      {
+        "log_type": "dns",
+        "files_processed": 1,
+        "records": 2,
+        "malformed": 0,
+        "data_records_seen": 2
+      },
+      {
+        "log_type": "ssl",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "log_type": "capture_loss",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      },
+      {
+        "log_type": "reporter",
+        "files_processed": 1,
+        "records": 1,
+        "malformed": 0,
+        "data_records_seen": 1
+      }
+    ],
+    "earliest_timestamp": "2026-07-20T08:00:10+00:00",
+    "latest_timestamp": "2026-07-20T08:02:10+00:00",
+    "conn_log_available": true,
+    "capture_loss_available": true,
+    "warnings": [],
+    "parse_errors": []
+  },
+  "sensor_health": {
+    "status": "degraded",
+    "capture_loss_available": true,
+    "max_capture_loss_percent": 2.5,
+    "capture_loss_samples": 1,
+    "aggregates_with_missed_bytes": 1,
+    "total_missed_bytes": 512,
+    "reporter_errors": [],
+    "reporter_warnings": [
+      "checksum offloading suspected on interface"
+    ],
+    "malformed_records": 0,
+    "missing_logs": [],
+    "observation_start": "2026-07-20T08:00:10+00:00",
+    "observation_end": "2026-07-20T08:02:10+00:00",
+    "notes": [
+      "Capture loss 2.50% exceeds the configured threshold (1.0%)",
+      "1 flow aggregate contains missed bytes (content gaps)",
+      "Zeek can only describe traffic visible to its sensor; degradation lowers confidence but observed flows are never deleted"
+    ]
+  }
+}

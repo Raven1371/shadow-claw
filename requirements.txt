@@ -1,0 +1,12 @@
+# Runtime dependencies mirrored from pyproject.toml for legacy environments.
+# pyproject.toml is authoritative; CI verifies that these declarations agree.
+defusedxml>=0.7      # hardened XML parsing of untrusted scan files
+PyYAML>=6.0          # network_config.yaml support
+openpyxl>=3.1        # optional --excel workbook export
+
+# Optional (not pip-installable): Graphviz system package for SVG/PNG
+# diagram rendering. .dot and .mmd sources are always written regardless.
+#   Debian/Ubuntu: sudo apt install graphviz
+#   RHEL/Fedora:   sudo dnf install graphviz
+#   macOS:         brew install graphviz
+#   Windows:       winget install Graphviz.Graphviz

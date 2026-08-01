@@ -1,0 +1,254 @@
+# nmap-flow-analyzer configuration
+# Copy to network_config.yaml, edit for your environment, and pass with:
+#   python nmap_flow_analyzer.py --input full-scan.xml --config network_config.yaml
+#
+# Everything here is optional. The more you fill in, the more the tool can
+# attribute (zones, roles, owners) and the fewer items land in manual review.
+# Values declared here are labeled "User-Defined" in every output — the tool
+# never silently converts your declarations into observed facts.
+
+# Where the Nmap scan was run FROM. Observed reachability is only proven
+# from this point; declaring it correctly is essential for honest results.
+scanner:
+  ip: 192.168.1.50
+  hostname: sec-scan01
+  zone: Management
+
+# stateful  -> no return-traffic rules are generated (the firewall tracks state)
+# stateless -> each inbound allow gets a matching, clearly-labeled return rule
+firewall_mode: stateful
+
+# Networks considered internal. Used for zone resolution and NSE
+# cross-reference analysis.
+local_networks:
+  - 192.168.0.0/16
+
+# Named zones for the diagram and rule tables. Most-specific prefix wins.
+# Two forms are supported:
+#   legacy list form:   ZoneName: [cidr, ...]
+#   extended map form:  ZoneName: {cidrs: [...], approved_source_networks: [...],
+#                                  approved_destination_networks: [...]}
+zones:
+  Management:
+    cidrs:
+      - 192.168.1.0/24
+    # Zone-level approval policy (checked when no host policy applies):
+    approved_destination_networks:
+      - 192.168.10.0/24
+  Servers:
+    - 192.168.10.0/24
+  Workstations:
+    - 192.168.20.0/24
+
+# Per-host knowledge. Keyed by IP address.
+hosts:
+  192.168.10.10:
+    hostname: dc01.example.local
+    role: Domain controller          # overrides inference (confidence 100)
+    device_class: server
+    owner: Directory Services
+    purpose: Primary AD DS
+    approved_services:               # documented, expected listeners
+      - {protocol: tcp, port: 88,  service: Kerberos}
+      - {protocol: tcp, port: 389, service: LDAP}
+      - {protocol: tcp, port: 445, service: SMB}
+      - {protocol: udp, port: 53,  service: DNS}
+    expected_inbound:                # who should be allowed to reach it
+      - protocol: tcp
+        port: 389
+        sources: [192.168.20.0/24]  # CIDRs, IPs, or a zone name
+        purpose: Workstation LDAP lookups
+  192.168.10.20:
+    hostname: web01.example.local
+    role: Web server
+    owner: AppOps
+    purpose: Intranet portal
+    approved_services:
+      - {protocol: tcp, port: 443, service: HTTPS}
+    expected_outbound:               # declared dependencies (User-Defined)
+      - destination: 192.168.10.30
+        protocol: tcp
+        port: 5432
+        purpose: Portal database backend
+
+  192.168.10.30:
+    hostname: db01.example.local
+    role: Database server
+    owner: Data Platform
+    purpose: Portal database
+    # Approved-network enforcement (most specific policy wins:
+    # host > zone > global). A /32 is matched exactly, never widened.
+    approved_source_networks:
+      - 192.168.10.20/32     # only the web tier may reach this host
+      - 192.168.50.0/24      # ...and the DBA jump subnet
+    approved_destination_networks:
+      - 192.168.1.10/32      # outbound only to the DNS/NTP server
+
+# Shared infrastructure. Only used when --include-inferred-outbound is set;
+# resulting flows are labeled "Inferred" and never presented as observed.
+infrastructure:
+  dns_servers: [192.168.1.10]
+  ntp_servers: [192.168.1.10]
+  domain_controllers: [192.168.10.10]
+  authentication_servers: []
+  logging_servers: [192.168.1.20]
+  patch_servers: []
+  backup_servers: []
+  mail_relay_servers: []
+  proxy_servers: []
+
+# Known application flows the scan cannot see (labeled User-Defined).
+# Each entry can produce BOTH a source-side outbound candidate and a
+# destination-side inbound candidate (see rule_generation below).
+# 'port' and 'destination_port' are accepted as synonyms.
+defined_flows:
+  - source: 192.168.10.20
+    destination: 192.168.10.30
+    protocol: tcp
+    destination_port: 5432
+    service: PostgreSQL
+    purpose: Web application database access
+
+policy:
+  # scanner-ip  -> inbound rule sources default to the scanner /32 (honest)
+  # scanner-zone -> widen to the scanner's zone prefixes (flagged as widened)
+  default_source_scope: scanner-ip
+  # If set, management services (SSH/RDP/WinRM/SNMP/IPMI...) recommend
+  # restriction to this network.
+  management_source: 192.168.1.0/24
+  # Sources broader than these prefix lengths get a scope warning
+  # (moved to manual review entirely under --strict).
+  max_source_prefixlen_ipv4: 24
+  max_source_prefixlen_ipv6: 64
+  # Services that must always be reviewed by a human, regardless of state.
+  always_manual_review:
+    - {protocol: tcp, port: 23}      # telnet
+    - {service: SNMP}
+  # Transparent risk adjustments applied after built-in rules.
+  risk_overrides:
+    - {service: HTTPS, port: 443, level: Low, reason: Standard intranet portal}
+
+# ---------------------------------------------------------------------------
+# How declared/expected flows become candidate rules.
+# ---------------------------------------------------------------------------
+rule_generation:
+  # One declared dependency (web01 -> db01 tcp/5432) may need enforcement at
+  # BOTH endpoints. These toggles control which perspectives are produced.
+  generate_source_outbound: true
+  generate_destination_inbound: true
+  # endpoint_and_network (default): both endpoint perspectives; the flow
+  #   record in normalized_data.json is the normalized network-flow record.
+  # endpoint_only: both endpoint perspectives, no network-record semantics.
+  # network_only: ONE normalized network rule per declared flow
+  #   (perspective "network"), no duplicate endpoint rows.
+  enforcement_model: endpoint_and_network
+
+# ---------------------------------------------------------------------------
+# Inferred outbound dependencies (only with --include-inferred-outbound).
+# Every inferred flow names the policy entry and infrastructure entry that
+# caused it and carries a confidence score.
+# ---------------------------------------------------------------------------
+inference_policy:
+  # Below this confidence a dependency is reported but withheld to manual
+  # review instead of becoming a candidate rule.
+  minimum_confidence_for_candidate_rule: 70
+
+  dns:
+    enabled: true
+    protocols:        # infer only these transports
+      - udp
+      - tcp
+
+  ntp:
+    enabled: true
+
+  logging:
+    enabled: true
+    # Only the preferred transport is inferred; add fallback_transports
+    # explicitly if (and only if) you really run plain UDP syslog too.
+    preferred_transport:
+      protocol: tcp
+      port: 6514
+    fallback_transports: []
+    #  - {protocol: udp, port: 514}
+
+  active_directory:
+    enabled: true
+    # AD client dependencies are inferred ONLY for these roles. Linux hosts
+    # are excluded unless you add their role here explicitly.
+    enabled_for_roles:
+      - Windows server
+      - Windows workstation
+      - Domain controller
+
+  patch_management:
+    enabled: false
+
+  backup:
+    enabled: false
+
+# ---------------------------------------------------------------------------
+# Global approved-network policy (lowest precedence; host > zone > global).
+# ---------------------------------------------------------------------------
+global_policy:
+  approved_source_networks: []
+  approved_destination_networks: []
+
+# ---------------------------------------------------------------------------
+# Zeek passive-sensor integration (v1.2.0, optional)
+# ---------------------------------------------------------------------------
+# Used only when the analyzer is invoked with --zeek-dir. Zeek describes
+# traffic actually observed by a passive sensor; Nmap describes reachability
+# from the scanner; defined_flows describe declared intent. The analyzer
+# correlates all three without conflating them.
+zeek:
+  # Informational sensor name shown in reports and manual-review items.
+  sensor_name: core-zeek01
+
+  # Networks the sensor is expected to see. Anything outside these is
+  # treated as an external endpoint (reported separately; no automatic
+  # rules). When empty, zone CIDRs + local_networks are used instead, and
+  # if those are also empty, globally routable addresses count as external.
+  monitored_networks:
+    - 192.168.0.0/16
+
+  # Zone label used for external endpoints in reports and diagrams.
+  external_zone_name: External
+
+  # The Nmap scan itself appears in Zeek logs. When true (recommended),
+  # traffic originated by scanner.ip is preserved for correlation and audit
+  # but never counts as production usage and never creates dependency rules.
+  exclude_nmap_scanner_traffic_from_rules: true
+
+  # IPs or CIDRs whose traffic stays in input statistics but never
+  # generates candidate rules (e.g. vulnerability scanners, monitoring).
+  ignored_sources: []
+  ignored_destinations: []
+
+  # Minimum evidence before a successful Zeek flow may become a candidate
+  # rule. Ratio is successful/total for the aggregate, 0.0-1.0.
+  minimum_successful_connections_for_rule: 1
+  minimum_success_ratio_for_rule: 0.0
+
+  # Capture loss (percent, 0-100) above this threshold marks the sensor
+  # degraded and adds a manual-review item. Missing capture_loss.log means
+  # health is "unknown", never assumed healthy.
+  capture_loss_warning_percent: 1.0
+
+  # Bounded sample lists so large logs cannot make reports unbounded.
+  max_sample_uids: 5
+  max_sample_names: 10
+
+  # Streaming-parser safety limits (protects against hostile .gz input).
+  max_line_length_bytes: 1048576
+  max_records_per_file: 10000000
+
+  # Draw failed/rejected/one-way traffic as distinct diagram edges.
+  # They never become candidate rules regardless of this setting.
+  include_attempted_flows_in_diagram: false
+
+  # When true, successful flows to external endpoints may produce candidate
+  # rules — always with concrete IP addresses (never FQDNs) and always
+  # subject to policy and strict-mode review. Default keeps external
+  # dependencies report-only.
+  include_external_dependencies_in_rules: false

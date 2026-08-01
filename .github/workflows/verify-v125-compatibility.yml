@@ -1,0 +1,94 @@
+name: Verify v1.2.4 vs v1.2.5 compatibility
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [release/v1.3.0-linux-rc]
+    paths:
+      - ".github/workflows/verify-v125-compatibility.yml"
+      - "scripts/compare_v124_v125.py"
+  pull_request:
+    paths:
+      - ".github/workflows/verify-v125-compatibility.yml"
+      - "scripts/compare_v124_v125.py"
+
+permissions:
+  contents: read
+
+env:
+  V124_COMMIT: 8842d81f978a7219ccfad2b7396d09929751a219
+  V125_COMMIT: 9ab10fed186b3a0d8c2813a1a86a80ebf0a56b41
+
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies and Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y graphviz
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Materialize immutable versions
+        run: |
+          git worktree add --detach baseline "$V124_COMMIT"
+          git worktree add --detach candidate "$V125_COMMIT"
+      - name: Run equivalent analyses
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/compat/{v124,v125}/{nmap-only,nmap-zeek,no-graphviz}
+          run_analysis() {
+            local tree="$1" version="$2" scenario="$3"
+            shift 3
+            PYTHONPATH="$tree" python "$tree/nmap_flow_analyzer.py" \
+              --input "$tree/examples/sample-scan.xml" \
+              --config "$tree/network_config.example.yaml" \
+              --output-dir "artifacts/compat/$version/$scenario" \
+              --scanner-ip 192.168.1.50 --excel "$@"
+          }
+          run_analysis baseline v124 nmap-only
+          run_analysis candidate v125 nmap-only
+          run_analysis baseline v124 nmap-zeek --zeek-dir baseline/examples/zeek-sample
+          run_analysis candidate v125 nmap-zeek --zeek-dir candidate/examples/zeek-sample
+          python_bin="$(command -v python)"
+          PATH=/path-without-graphviz PYTHONPATH=baseline "$python_bin" baseline/nmap_flow_analyzer.py \
+            --input baseline/examples/sample-scan.xml \
+            --config baseline/network_config.example.yaml \
+            --output-dir artifacts/compat/v124/no-graphviz \
+            --scanner-ip 192.168.1.50 --excel
+          PATH=/path-without-graphviz PYTHONPATH=candidate "$python_bin" candidate/nmap_flow_analyzer.py \
+            --input candidate/examples/sample-scan.xml \
+            --config candidate/network_config.example.yaml \
+            --output-dir artifacts/compat/v125/no-graphviz \
+            --scanner-ip 192.168.1.50 --excel
+      - name: Compare semantic outputs
+        run: |
+          python scripts/compare_v124_v125.py \
+            --scenario nmap-only artifacts/compat/v124/nmap-only artifacts/compat/v125/nmap-only \
+            --scenario nmap-zeek artifacts/compat/v124/nmap-zeek artifacts/compat/v125/nmap-zeek \
+            --scenario graphviz-unavailable artifacts/compat/v124/no-graphviz artifacts/compat/v125/no-graphviz \
+            --json artifacts/V1.2.4_VS_V1.2.5_COMPATIBILITY.json \
+            --markdown artifacts/V1.2.4_VS_V1.2.5_COMPATIBILITY_REPORT.md
+      - name: Write job summary
+        if: always()
+        run: |
+          if test -f artifacts/V1.2.4_VS_V1.2.5_COMPATIBILITY_REPORT.md; then
+            cat artifacts/V1.2.4_VS_V1.2.5_COMPATIBILITY_REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Upload compatibility evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v124-v125-compatibility-${{ github.run_id }}
+          path: artifacts/
+          if-no-files-found: error
+
