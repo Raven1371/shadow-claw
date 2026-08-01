@@ -81,7 +81,9 @@ def test_graphviz_render_test_is_bounded_and_checks_both_formats():
     assert any(check.name == "Graphviz SVG render" for check in checks)
     assert any(check.name == "Graphviz PNG render" for check in checks)
     graphviz_calls = [
-        call for call in run.call_args_list if isinstance(call.args[0], list)
+        call for call in run.call_args_list
+        if isinstance(call.args[0], list) and call.args[0]
+        and Path(call.args[0][0]).name in {"dot", "dot.exe"}
     ]
     assert len(graphviz_calls) == 3
     assert all(call.kwargs.get("timeout") == 3 for call in graphviz_calls)

@@ -14,6 +14,10 @@ python3 -m PyInstaller --clean --noconfirm --onedir --name nmap-flow-analyzer \
   --distpath "$work/onedir" --workpath "$work/pyinstaller-work" \
   --specpath "$work" "$root/nmap_flow_analyzer.py"
 graphviz_lib=$(pkg-config --variable=libdir libgvc 2>/dev/null || true)
+if [[ -z "$graphviz_lib" || ! -d "$graphviz_lib/graphviz" ]]; then
+  graphviz_plugin_dir=$(find /usr/lib /usr/lib64 -type d -path '*/graphviz' -print -quit 2>/dev/null || true)
+  [[ -n "$graphviz_plugin_dir" ]] && graphviz_lib=$(dirname "$graphviz_plugin_dir")
+fi
 onefile_args=(--clean --noconfirm --onefile --name nmap-flow-analyzer
   --distpath "$work/onefile" --workpath "$work/pyinstaller-onefile"
   --specpath "$work" --add-binary "$(command -v dot):graphviz/bin")
