@@ -1,3 +1,5 @@
+%global _build_id_links none
+
 Name: nmap-flow-analyzer
 Version: 1.3.0
 Release: 0.rc1%{?dist}
