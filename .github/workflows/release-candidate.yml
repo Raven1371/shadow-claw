@@ -40,6 +40,8 @@ jobs:
         run: |
           set -euo pipefail
           for run_id in "$UBUNTU_RUN_ID" "$RHEL_RUN_ID"; do
+            test "$run_id" != 30676994869
+            test "$run_id" != 30676994728
             test "$(gh run view "$run_id" --json conclusion --jq .conclusion)" = success
             run_sha="$(gh run view "$run_id" --json headSha --jq .headSha)"
             git merge-base --is-ancestor "$run_sha" "$GITHUB_SHA"
@@ -53,20 +55,34 @@ jobs:
           mkdir -p incoming/ubuntu incoming/rhel release
           gh run download "${{ inputs.ubuntu_run_id }}" --dir incoming/ubuntu
           gh run download "${{ inputs.rhel_run_id }}" --dir incoming/rhel
-          find incoming -type f \( -name 'nmap-flow-analyzer-*' -a ! -name '*.txt' \) -exec cp {} release/ \;
+          find incoming -type f -name 'nmap-flow-analyzer-1.3.0-rc1-*-x64*' ! -name '*.license-inventory.json' -exec cp {} release/ \;
       - name: Create clean source archives
         run: |
           git archive --format=zip --prefix=nmap-flow-analyzer-1.3.0-rc1/ \
             -o release/nmap-flow-analyzer-1.3.0-rc1-source.zip HEAD
           git archive --format=tar.gz --prefix=nmap-flow-analyzer-1.3.0-rc1/ \
             -o release/nmap-flow-analyzer-1.3.0-rc1-source.tar.gz HEAD
+          unzip -l release/nmap-flow-analyzer-1.3.0-rc1-source.zip | grep 'nmap-flow-analyzer-1.3.0-rc1/LICENSE'
+          tar -tzf release/nmap-flow-analyzer-1.3.0-rc1-source.tar.gz | grep 'nmap-flow-analyzer-1.3.0-rc1/licenses/DEPENDENCY_LICENSE_INVENTORY.json'
       - name: Create and verify release inventory
         run: |
           mapfile -t artifacts < <(find release -maxdepth 1 -type f -name 'nmap-flow-analyzer-*' -print | sort)
           python scripts/create-checksums.py --version "$RELEASE_VERSION" --output-dir release "${artifacts[@]}"
+          test "${#artifacts[@]}" -eq 10
           python scripts/verify-release.py --directory release \
-            --manifest release/release-artifacts.json --version "$RELEASE_VERSION"
-          cp RELEASE_NOTES.md PLATFORM_STATUS.md release/
+            --manifest release/release-manifest.json --version "$RELEASE_VERSION"
+          cp RELEASE_NOTES.md PLATFORM_STATUS.md LICENSE NOTICE COPYRIGHT.md \
+            COMMERCIAL_USE.md TRADEMARKS.md THIRD_PARTY_NOTICES.md release/
+      - name: Legal finalization reminder
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Legal finalization reminder
+
+          Before considering the Shadow ecosystem fully finalized, obtain
+          professional legal review, register applicable copyrights, and pursue
+          trademark filings for Shadow Claw™, Shadow Fang™, Shadow Core™, and
+          related branding.
+          EOF
       - uses: actions/upload-artifact@v4
         with:
           name: v130-rc1-release-candidate-${{ github.run_id }}

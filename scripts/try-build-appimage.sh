@@ -30,10 +30,18 @@ cat > "$appdir/nmap-flow-analyzer.svg" <<'EOF'
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="20" fill="#18212f"/><path d="M24 92V36h15l25 33 25-33h15v56H87V62L64 91 41 62v30z" fill="#d7e3f4"/></svg>
 EOF
 tool="$work/appimagetool"
+tool_version=13
+tool_name=obsolete-appimagetool-x86_64.AppImage
+tool_url="https://github.com/AppImage/AppImageKit/releases/download/$tool_version/$tool_name"
+tool_sha256=df3baf5ca5facbecfc2f3fa6713c29ab9cefa8fd8c1eac5d283b79cab33e4acb
 curl --fail --location --retry 3 \
-  https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage \
+  "$tool_url" \
   --output "$tool"
+printf '%s  %s\n' "$tool_sha256" "$tool" | sha256sum --check --strict
 chmod 0755 "$tool"
 ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 "$tool" "$appdir" \
   "$out/nmap-flow-analyzer-$release_version-$platform-x64.AppImage"
 chmod 0755 "$out/nmap-flow-analyzer-$release_version-$platform-x64.AppImage"
+cat > "$out/appimage-tool-provenance.json" <<EOF
+{"version":"$tool_version","commit":"8bbf694455d00f48d835f56afaa1dabcd9178ba6","filename":"$tool_name","source_url":"$tool_url","sha256":"$tool_sha256","license":"MIT"}
+EOF

@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools==80.9.0", "wheel==0.45.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,11 +7,16 @@ name = "nmap-flow-analyzer"
 version = "1.3.0"
 description = "Offline network analysis and security investigation with human-reviewed firewall recommendations"
 readme = "README.md"
+license = "PolyForm-Noncommercial-1.0.0"
+license-files = [
+  "LICENSE", "NOTICE", "COPYRIGHT.md", "COMMERCIAL_USE.md",
+  "TRADEMARKS.md", "THIRD_PARTY_NOTICES.md",
+]
 requires-python = ">=3.9"
 dependencies = [
-  "defusedxml>=0.7",
-  "PyYAML>=6.0",
-  "openpyxl>=3.1",
+  "defusedxml==0.7.1",
+  "PyYAML==6.0.2",
+  "openpyxl==3.1.5",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -24,12 +29,17 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
-  "build>=1.2",
-  "pytest>=7.0",
+  "build==1.3.0",
+  "pytest==8.4.1",
 ]
 
 [project.scripts]
 nmap-flow-analyzer = "nmap_flow_analyzer.cli:main"
+
+[project.urls]
+Repository = "https://github.com/Raven1371/Nmap-scan-and-reports"
+License = "https://polyformproject.org/licenses/noncommercial/1.0.0"
+"Commercial Licensing" = "https://github.com/Raven1371/Nmap-scan-and-reports"
 
 [tool.setuptools]
 packages = ["nmap_flow_analyzer"]

@@ -26,7 +26,7 @@ def test_release_inventory_round_trip_and_tamper_detection():
             "--output-dir", str(release), str(artifact),
         )
         assert created.returncode == 0, created.stderr
-        manifest = release / "release-artifacts.json"
+        manifest = release / "release-manifest.json"
         payload = json.loads(manifest.read_text("utf-8"))
         assert payload["artifacts"][0]["platform"] == "ubuntu"
         assert payload["artifacts"][0]["architecture"] == "x64"

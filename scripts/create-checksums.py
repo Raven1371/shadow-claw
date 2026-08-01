@@ -81,7 +81,7 @@ def main() -> int:
     checksums = "".join(f"{item['sha256']}  {item['filename']}\n" for item in entries)
     (args.output_dir / "SHA256SUMS.txt").write_text(checksums, encoding="utf-8")
     manifest = {"schema_version": "1.0", "release_version": args.version, "artifacts": entries}
-    (args.output_dir / "release-artifacts.json").write_text(
+    (args.output_dir / "release-manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
     )
     return 0

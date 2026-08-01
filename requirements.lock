@@ -1,0 +1,5 @@
+# Runtime authority for release builds; mirrored by pyproject.toml constraints.
+defusedxml==0.7.1
+PyYAML==6.0.2
+openpyxl==3.1.5
+et_xmlfile==2.0.0
