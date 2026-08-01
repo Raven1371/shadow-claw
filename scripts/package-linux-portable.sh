@@ -27,7 +27,7 @@ fi
 mapfile -t system_graphviz_dependencies < <(
   { printf '%s\0' "$(command -v dot)"; find "$graphviz_lib/graphviz" -type f -name '*.so*' -print0 2>/dev/null; } |
     xargs -0 -r ldd 2>/dev/null |
-    awk '/=> \/[^ ]+/ {print $3} /^\/[^ ]+/ {print $1}' |
+    awk '{path=""} /=> \/[^ ]+/ {path=$3} /^\/[^ ]+/ {path=$1} path && path !~ /\/(ld-linux|libc\.so|libpthread|libdl|librt|libm\.so|libresolv|libutil)/ {print path}' |
     sort -u
 )
 for dependency in "${system_graphviz_dependencies[@]}"; do
@@ -48,7 +48,7 @@ fi
 mapfile -t graphviz_dependencies < <(
   find "$bundle/graphviz" -type f \( -name dot -o -name '*.so*' \) -print0 |
     xargs -0 -r ldd 2>/dev/null |
-    awk '/=> \/[^ ]+/ {print $3} /^\/[^ ]+/ {print $1}' |
+    awk '{path=""} /=> \/[^ ]+/ {path=$3} /^\/[^ ]+/ {path=$1} path && path !~ /\/(ld-linux|libc\.so|libpthread|libdl|librt|libm\.so|libresolv|libutil)/ {print path}' |
     sort -u
 )
 for dependency in "${graphviz_dependencies[@]}"; do
