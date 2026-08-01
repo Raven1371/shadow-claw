@@ -74,8 +74,20 @@ def main() -> int:
     python_docs = [p for p in (Path(sys.base_prefix) / "LICENSE", Path(sys.base_prefix) / "LICENSE.txt") if p.is_file()]
     python_docs += list(Path("/usr/share/doc").glob("python3*/copyright"))
     if not python_docs and args.platform == "rhel":
-        python_library = Path(sysconfig.get_config_var("LIBDIR")) / sysconfig.get_config_var("LDLIBRARY")
-        python_package = run("rpm", "-qf", str(python_library), "--qf", "%{NAME}")
+        names = {sysconfig.get_config_var("LDLIBRARY"), sysconfig.get_config_var("INSTSONAME")}
+        candidates = [Path(directory) / name for directory in (sysconfig.get_config_var("LIBDIR"), "/lib64", "/usr/lib64")
+                      for name in names if directory and name]
+        python_package = None
+        for python_library in candidates:
+            if not python_library.exists():
+                continue
+            try:
+                python_package = run("rpm", "-qf", str(python_library.resolve()), "--qf", "%{NAME}")
+                break
+            except subprocess.CalledProcessError:
+                continue
+        if not python_package:
+            raise SystemExit("CPython shared-library package ownership not found")
         python_docs = [Path(p) for p in run("rpm", "-ql", python_package).splitlines()
                        if "/license" in p.lower() or p.lower().endswith(("/copying", "/copyright", "/license"))]
         python_docs = [p for p in python_docs if p.is_file()]
