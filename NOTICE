@@ -1,0 +1,9 @@
+nmap-flow-analyzer
+Copyright 2026 Kache Flanery
+
+This product is licensed under the Apache License, Version 2.0. It is not an
+Apache Software Foundation project and is not endorsed by the ASF.
+
+The distribution includes third-party software under separate licenses. See
+THIRD_PARTY_NOTICES.md and the licenses directory. Contributor attribution is
+preserved in the Git history of the source repository.
