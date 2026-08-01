@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
-"$root/scripts/package-linux-portable.sh" ubuntu
+bash "$root/scripts/package-linux-portable.sh" ubuntu
 release_version=${RELEASE_VERSION:-1.3.0-rc1}
 work="$root/build/linux-ubuntu"
 out="$root/dist-linux-ubuntu"

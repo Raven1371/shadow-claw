@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 50
     steps:
       - name: Install system tooling
-        run: dnf install -y git python3 python3-pip graphviz gcc rpm-build findutils tar gzip curl
+        run: dnf install -y git python3 python3-pip graphviz gcc rpm-build findutils tar gzip
       - uses: actions/checkout@v4
       - name: Trust checkout and install Python build dependencies
         run: |

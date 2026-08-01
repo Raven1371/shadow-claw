@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 root=$(cd "$(dirname "$0")/.." && pwd)
-"$root/scripts/package-linux-portable.sh" rhel
+bash "$root/scripts/package-linux-portable.sh" rhel
 release_version=${RELEASE_VERSION:-1.3.0-rc1}
 work="$root/build/linux-rhel"
 out="$root/dist-linux-rhel"
