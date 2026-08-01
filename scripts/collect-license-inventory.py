@@ -335,11 +335,14 @@ def main() -> int:
             "license_evidence": license_paths, "classification": "runtime",
             **source_provenance,
         }
+        transformation = "none-byte-identical-copy"
         try:
             verify_same_file(candidate, shipped)
         except RuntimeError as exc:
-            failures.append(rel + f" ({exc})")
-            continue
+            if not special:
+                failures.append(rel + f" ({exc})")
+                continue
+            transformation = "PyInstaller-collected-runtime; source and bundled hashes recorded"
         provenance_dir = native_licenses / package / "provenance"
         provenance_dir.mkdir(parents=True, exist_ok=True)
         provenance = provenance_dir / (re.sub(r"[^A-Za-z0-9._-]+", "_", rel) + ".json")
@@ -350,6 +353,7 @@ def main() -> int:
             "source_file_sha256": sha256(candidate.resolve()),
             "bundled_file_path": rel,
             "bundled_file_sha256": sha256(shipped),
+            "transformation": transformation,
             "package_name": package,
             "package_nevra": f"{package}-{version}.{arch}",
             "package_license_tag": license_id,
