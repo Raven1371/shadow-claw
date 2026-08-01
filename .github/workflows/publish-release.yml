@@ -1,0 +1,56 @@
+name: Publish final v1.3.0
+
+on:
+  workflow_dispatch:
+    inputs:
+      windows_verification_run_id:
+        description: Successful Windows 11 self-hosted verification run ID
+        required: true
+        type: string
+      windows_package_run_id:
+        description: Successful Windows package workflow run ID
+        required: true
+        type: string
+      release_candidate_run_id:
+        description: Successful release-candidate assembly run ID
+        required: true
+        type: string
+      confirmation:
+        description: Type PUBLISH-v1.3.0
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  verify-gates:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require explicit confirmation and successful gates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "${{ inputs.confirmation }}" = PUBLISH-v1.3.0
+          for run_id in \
+            "${{ inputs.windows_verification_run_id }}" \
+            "${{ inputs.windows_package_run_id }}" \
+            "${{ inputs.release_candidate_run_id }}"; do
+            test "$(gh run view "$run_id" --json conclusion --jq .conclusion)" = success
+          done
+
+  publish:
+    needs: verify-gates
+    runs-on: ubuntu-24.04
+    environment: production-release
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Protected final-release boundary
+        run: |
+          echo "Final publication remains intentionally unavailable until the"
+          echo "Windows artifact assembly and cross-platform inventory are implemented."
+          exit 1

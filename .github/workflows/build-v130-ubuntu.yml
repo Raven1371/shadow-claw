@@ -37,7 +37,15 @@ jobs:
       - name: Test current v1.3.0 source
         run: |
           python -m compileall -q nmap_flow_analyzer
-          python -m pytest -q
+          set +e
+          python scripts/run_pytest_with_skip_report.py \
+            --json build/ubuntu-skip-report.json \
+            --markdown build/ubuntu-skip-report.md \
+            --platform "Ubuntu 24.04" -- -q
+          test_rc=$?
+          set -e
+          cat build/ubuntu-skip-report.md
+          test "$test_rc" -eq 0
           python run_tests.py
       - name: Build portable, onefile, and DEB
         run: bash scripts/build-ubuntu.sh
@@ -77,4 +85,5 @@ jobs:
             dist-linux-ubuntu/*
             build/deb-file-list.txt
             build/appimage-status.txt
+            build/ubuntu-skip-report.*
           if-no-files-found: error

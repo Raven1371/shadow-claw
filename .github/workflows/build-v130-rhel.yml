@@ -36,7 +36,15 @@ jobs:
       - name: Test current v1.3.0 source
         run: |
           python3 -m compileall -q nmap_flow_analyzer
-          python3 -m pytest -q
+          set +e
+          python3 scripts/run_pytest_with_skip_report.py \
+            --json build/rocky-skip-report.json \
+            --markdown build/rocky-skip-report.md \
+            --platform "Rocky Linux 9" -- -q
+          test_rc=$?
+          set -e
+          cat build/rocky-skip-report.md
+          test "$test_rc" -eq 0
           python3 run_tests.py
       - name: Build portable, onefile, and RPM
         run: bash scripts/build-rhel.sh
@@ -76,4 +84,5 @@ jobs:
             dist-linux-rhel/*
             build/rpm-file-list.txt
             build/appimage-status.txt
+            build/rocky-skip-report.*
           if-no-files-found: error
