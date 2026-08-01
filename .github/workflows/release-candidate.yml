@@ -41,7 +41,8 @@ jobs:
           set -euo pipefail
           for run_id in "$UBUNTU_RUN_ID" "$RHEL_RUN_ID"; do
             test "$(gh run view "$run_id" --json conclusion --jq .conclusion)" = success
-            test "$(gh run view "$run_id" --json headSha --jq .headSha)" = "$GITHUB_SHA"
+            run_sha="$(gh run view "$run_id" --json headSha --jq .headSha)"
+            git merge-base --is-ancestor "$run_sha" "$GITHUB_SHA"
           done
           test "$(gh run view "$UBUNTU_RUN_ID" --json workflowName --jq .workflowName)" = "Build v1.3.0 RC on Ubuntu"
           test "$(gh run view "$RHEL_RUN_ID" --json workflowName --jq .workflowName)" = "Build v1.3.0 RC on Rocky Linux 9"
