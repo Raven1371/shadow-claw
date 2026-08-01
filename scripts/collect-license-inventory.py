@@ -35,6 +35,19 @@ def owner(path: Path, platform: str) -> tuple[str, str, str, str, list[Path]]:
         version, arch, license_id = run("rpm", "-q", package, "--qf", "%{VERSION}-%{RELEASE}\t%{ARCH}\t%{LICENSE}").split("\t")
         docs = [Path(p) for p in run("rpm", "-ql", package).splitlines()
                 if "/license" in p.lower() or p.lower().endswith(("/copying", "/copyright", "/license"))]
+        # Minimal RPM installations often split license files into a sibling
+        # package built from the same source RPM (for example a *-common
+        # package). Attribute that installed evidence to the shared source,
+        # without guessing a package name or downloading anything.
+        if not any(p.is_file() for p in docs):
+            source_rpm = run("rpm", "-q", package, "--qf", "%{SOURCERPM}")
+            installed = run("rpm", "-qa", "--qf", "%{NAME}\t%{SOURCERPM}\n")
+            siblings = [line.split("\t", 1)[0] for line in installed.splitlines()
+                        if "\t" in line and line.split("\t", 1)[1] == source_rpm]
+            for sibling in siblings:
+                docs.extend(Path(p) for p in run("rpm", "-ql", sibling).splitlines()
+                            if "/license" in p.lower()
+                            or p.lower().endswith(("/copying", "/copyright", "/license")))
     return package, version, arch, license_id, [p for p in docs if p.is_file()]
 
 
