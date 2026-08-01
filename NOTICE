@@ -1,9 +1,12 @@
-nmap-flow-analyzer
-Copyright 2026 Kache Flanery
+Required Notice: Copyright 2026 Kache Flanery.
 
-This product is licensed under the Apache License, Version 2.0. It is not an
-Apache Software Foundation project and is not endorsed by the ASF.
+Shadow Claw™, Shadow Fang™, and Shadow Core™ are projects owned by
+Kache Flanery.
 
-The distribution includes third-party software under separate licenses. See
-THIRD_PARTY_NOTICES.md and the licenses directory. Contributor attribution is
-preserved in the Git history of the source repository.
+Project-owned software is made available under the PolyForm
+Noncommercial License 1.0.0.
+
+Commercial rights are not granted by the public repository.
+Commercial use requires a separate written agreement from Kache Flanery.
+
+Third-party software remains subject to its own licenses and notices.

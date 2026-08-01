@@ -1,8 +1,8 @@
 # Third-party notices
 
-This project is Apache-2.0 licensed, but its distributable applications include
-independent third-party components under their own terms. Nothing in the project
-license changes those terms.
+Project-owned material is offered under PolyForm Noncommercial 1.0.0. Its
+distributable applications include independent third-party components under
+their own terms. PolyForm does not replace, narrow, or override those terms.
 
 The machine-readable authority is
 `licenses/DEPENDENCY_LICENSE_INVENTORY.json`. Platform builds augment it with an

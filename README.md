@@ -1,5 +1,19 @@
 # nmap-flow-analyzer
 
+## License and Commercial Use
+
+Project-owned code is source-available for free noncommercial use under the
+PolyForm Noncommercial License 1.0.0. Permitted noncommercial use is governed
+by the exact terms in [LICENSE](LICENSE), including the standard provisions for
+noncommercial organizations and institutions. This is not an OSI-approved
+open-source license.
+
+Commercial use requires separate written authorization from Kache Flanery,
+who retains project copyright. See [COMMERCIAL_USE.md](COMMERCIAL_USE.md).
+Third-party components remain under their own licenses and notices. Shadow
+Claw™, Shadow Fang™, Shadow Core™, Shadow Evidence™, and associated branding
+are reserved as described in [TRADEMARKS.md](TRADEMARKS.md).
+
 Parses an Nmap XML report and produces a network data-flow diagram, conservative inbound and outbound firewall exception lists, a service inventory, and a manual-review report — with every finding labeled by how it was established (Observed, Inferred, User-Defined, Unknown, or Manual Review Required).
 
 > This report describes services and reachability observed from the Nmap scanner's location. It does not independently prove normal production communications between all listed systems.
