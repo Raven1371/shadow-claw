@@ -12,6 +12,8 @@ mkdir -p "$work" "$out"
 
 license_args=(
   --add-data "$root/LICENSE:." --add-data "$root/NOTICE:."
+  --add-data "$root/COPYRIGHT.md:." --add-data "$root/COMMERCIAL_USE.md:."
+  --add-data "$root/TRADEMARKS.md:."
   --add-data "$root/THIRD_PARTY_NOTICES.md:." --add-data "$root/licenses:licenses"
 )
 
@@ -62,7 +64,8 @@ done
 cp -a "$root/examples" "$bundle/"
 cp "$root/network_config.example.yaml" "$root/README.md" "$root/CHANGELOG.md" "$bundle/"
 cp -a "$root/docs/." "$bundle/docs/"
-cp "$root/LICENSE" "$root/NOTICE" "$root/THIRD_PARTY_NOTICES.md" "$bundle/"
+cp "$root/LICENSE" "$root/NOTICE" "$root/COPYRIGHT.md" "$root/COMMERCIAL_USE.md" \
+  "$root/TRADEMARKS.md" "$root/THIRD_PARTY_NOTICES.md" "$bundle/"
 rm -rf "$bundle/licenses"
 cp -a "$root/licenses" "$bundle/licenses"
 python3 "$root/scripts/collect-license-inventory.py" --platform "$platform" --bundle "$bundle"

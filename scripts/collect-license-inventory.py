@@ -8,6 +8,7 @@ import importlib.metadata
 import json
 import shutil
 import subprocess
+import sys
 import sysconfig
 from pathlib import Path
 
@@ -23,7 +24,7 @@ def is_elf(path: Path) -> bool:
         return False
 
 
-def owner(path: Path, platform: str) -> tuple[str, str, str, list[Path]]:
+def owner(path: Path, platform: str) -> tuple[str, str, str, str, list[Path]]:
     if platform == "ubuntu":
         package = run("dpkg-query", "-S", str(path.resolve())).split(":", 1)[0]
         version, arch = run("dpkg-query", "-W", "-f=${Version}\t${Architecture}", package).split("\t")
@@ -34,7 +35,7 @@ def owner(path: Path, platform: str) -> tuple[str, str, str, list[Path]]:
         version, arch, license_id = run("rpm", "-q", package, "--qf", "%{VERSION}-%{RELEASE}\t%{ARCH}\t%{LICENSE}").split("\t")
         docs = [Path(p) for p in run("rpm", "-ql", package).splitlines()
                 if "/license" in p.lower() or p.lower().endswith(("/copying", "/copyright", "/license"))]
-    return package, version, arch, [p for p in docs if p.is_file()] + [Path(license_id)]
+    return package, version, arch, license_id, [p for p in docs if p.is_file()]
 
 
 def main() -> int:
@@ -70,10 +71,11 @@ def main() -> int:
         source = bundle / rel
         shutil.copy2(source, pyinstaller_target / source.name)
 
-    python_docs = list(Path("/usr/share/doc").glob("python3*/copyright"))
+    python_docs = [p for p in (Path(sys.base_prefix) / "LICENSE", Path(sys.base_prefix) / "LICENSE.txt") if p.is_file()]
+    python_docs += list(Path("/usr/share/doc").glob("python3*/copyright"))
     if not python_docs and args.platform == "rhel":
-        python_binary = Path(run("sh", "-c", "command -v python3"))
-        python_package = run("rpm", "-qf", str(python_binary), "--qf", "%{NAME}")
+        python_library = Path(sysconfig.get_config_var("LIBDIR")) / sysconfig.get_config_var("LDLIBRARY")
+        python_package = run("rpm", "-qf", str(python_library), "--qf", "%{NAME}")
         python_docs = [Path(p) for p in run("rpm", "-ql", python_package).splitlines()
                        if "/license" in p.lower() or p.lower().endswith(("/copying", "/copyright", "/license"))]
         python_docs = [p for p in python_docs if p.is_file()]
@@ -95,8 +97,8 @@ def main() -> int:
         attribution = None
         for candidate in candidates:
             try:
-                package, version, arch, evidence = owner(candidate, args.platform)
-                attribution = (candidate, package, version, arch, evidence)
+                package, version, arch, license_id, evidence = owner(candidate, args.platform)
+                attribution = (candidate, package, version, arch, license_id, evidence)
                 break
             except (subprocess.CalledProcessError, ValueError, OSError):
                 continue
@@ -119,11 +121,11 @@ def main() -> int:
         if not attribution:
             failures.append(rel)
             continue
-        candidate, package, version, arch, evidence = attribution
+        candidate, package, version, arch, license_id, evidence = attribution
         license_paths = []
-        license_id = "See copied package license evidence"
-        if args.platform == "rhel" and evidence and not evidence[-1].is_file():
-            license_id = str(evidence.pop())
+        if not evidence:
+            failures.append(rel + " (package has no installed license evidence)")
+            continue
         for source in evidence:
             target = native_licenses / package / source.name
             target.parent.mkdir(parents=True, exist_ok=True)

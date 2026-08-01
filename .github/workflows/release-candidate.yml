@@ -71,7 +71,18 @@ jobs:
           test "${#artifacts[@]}" -eq 10
           python scripts/verify-release.py --directory release \
             --manifest release/release-manifest.json --version "$RELEASE_VERSION"
-          cp RELEASE_NOTES.md PLATFORM_STATUS.md release/
+          cp RELEASE_NOTES.md PLATFORM_STATUS.md LICENSE NOTICE COPYRIGHT.md \
+            COMMERCIAL_USE.md TRADEMARKS.md THIRD_PARTY_NOTICES.md release/
+      - name: Legal finalization reminder
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Legal finalization reminder
+
+          Before considering the Shadow ecosystem fully finalized, obtain
+          professional legal review, register applicable copyrights, and pursue
+          trademark filings for Shadow Claw™, Shadow Fang™, Shadow Core™, and
+          related branding.
+          EOF
       - uses: actions/upload-artifact@v4
         with:
           name: v130-rc1-release-candidate-${{ github.run_id }}

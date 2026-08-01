@@ -15,6 +15,9 @@ on:
       - "LICENSE"
       - "NOTICE"
       - "THIRD_PARTY_NOTICES.md"
+      - "COPYRIGHT.md"
+      - "COMMERCIAL_USE.md"
+      - "TRADEMARKS.md"
       - "licenses/**"
       - "requirements*.lock"
       - ".github/workflows/build-v130-ubuntu.yml"
@@ -60,6 +63,7 @@ jobs:
         run: |
           python scripts/validate-license-payload.py build/linux-ubuntu/bundle/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64
           dpkg-deb --contents dist-linux-ubuntu/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64.deb | grep '/usr/share/doc/nmap-flow-analyzer/LICENSE'
+          pyi-archive_viewer -l dist-linux-ubuntu/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64 | grep 'COMMERCIAL_USE.md'
       - name: Smoke-test portable and onefile
         run: |
           mkdir -p build/smoke-portable
