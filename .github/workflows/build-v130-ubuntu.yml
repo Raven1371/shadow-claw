@@ -14,6 +14,8 @@ on:
       - "scripts/smoke-test-package.py"
       - "scripts/collect-license-inventory.py"
       - "scripts/validate-license-payload.py"
+      - "scripts/benchmark-ingestion.py"
+      - "scripts/generate-sbom.py"
       - "LICENSE"
       - "NOTICE"
       - "THIRD_PARTY_NOTICES.md"
@@ -35,14 +37,14 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: Checkout immutable Shadow Core source
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: Raven1371/shadow-core
-          ref: b5328e605a8a6879981f92343284e509f5e2c162
+          ref: 066c55cabf8887f17c32b45d3071177c06370a99
           path: shadow-core-source
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
           cache: pip
@@ -52,10 +54,10 @@ jobs:
           sudo apt-get install -y graphviz libgraphviz-dev pkg-config dpkg-dev curl
           python -m pip install build==1.3.0
           python -m build --wheel shadow-core-source --outdir build/shadow-core-wheel
-          python -m pip install build/shadow-core-wheel/shadow_core-0.2.0.dev0-py3-none-any.whl
+          python -m pip install build/shadow-core-wheel/shadow_core-0.3.0.dev0-py3-none-any.whl
           python -m pip install -r requirements-dev.lock
           python -m pip install --no-deps -e .
-          python -c "import shadow_core; assert shadow_core.__version__ == '0.2.0.dev0'"
+          python -c "import shadow_core; assert shadow_core.__version__ == '0.3.0.dev0'"
       - name: Test current v1.3.0 source
         run: |
           python -m compileall -q nmap_flow_analyzer
@@ -69,6 +71,8 @@ jobs:
           cat build/ubuntu-skip-report.md
           test "$test_rc" -eq 0
           python run_tests.py
+          python scripts/benchmark-ingestion.py --work-dir build --records 10000 --output build/ubuntu-ingestion-benchmark.json
+          python scripts/generate-sbom.py --lock requirements.lock --component nmap-flow-analyzer --version 1.6.0.dev0 --output build/nmap-flow-analyzer.cdx.json
       - name: Build portable, onefile, and DEB
         run: bash scripts/build-ubuntu.sh
       - name: Validate license payload and native attribution
@@ -82,16 +86,16 @@ jobs:
           tar -xzf dist-linux-ubuntu/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64-portable.tar.gz -C build/smoke-portable
           python scripts/smoke-test-package.py \
             --command build/smoke-portable/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64/nmap-flow-analyzer \
-            --examples examples --config network_config.example.yaml --expected-version 1.5.0.dev0 --require-graphviz
+            --examples examples --config network_config.example.yaml --expected-version 1.6.0.dev0 --require-graphviz
           python scripts/smoke-test-package.py \
             --command dist-linux-ubuntu/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64 \
-            --examples examples --config network_config.example.yaml --expected-version 1.5.0.dev0 --require-graphviz
+            --examples examples --config network_config.example.yaml --expected-version 1.6.0.dev0 --require-graphviz
       - name: Install, test, and remove DEB
         run: |
           sudo dpkg -i dist-linux-ubuntu/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64.deb
           dpkg -L nmap-flow-analyzer | tee build/deb-file-list.txt
           python scripts/smoke-test-package.py --command /usr/bin/nmap-flow-analyzer \
-            --examples examples --config network_config.example.yaml --expected-version 1.5.0.dev0 --require-graphviz
+            --examples examples --config network_config.example.yaml --expected-version 1.6.0.dev0 --require-graphviz
           sudo dpkg -r nmap-flow-analyzer
           test ! -e /usr/bin/nmap-flow-analyzer
       - name: Build, inspect, and test AppImage
@@ -102,8 +106,8 @@ jobs:
           python scripts/validate-license-payload.py build/linux-ubuntu/AppDir/opt/nmap-flow-analyzer
           APPIMAGE_EXTRACT_AND_RUN=1 python scripts/smoke-test-package.py \
             --command dist-linux-ubuntu/nmap-flow-analyzer-1.3.0-rc1-ubuntu-x64.AppImage \
-            --examples examples --config network_config.example.yaml --expected-version 1.5.0.dev0 --require-graphviz
-      - uses: actions/upload-artifact@v4
+            --examples examples --config network_config.example.yaml --expected-version 1.6.0.dev0 --require-graphviz
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: v130-rc1-ubuntu-x64-${{ github.run_id }}
           path: |
@@ -111,4 +115,6 @@ jobs:
             build/deb-file-list.txt
             dist-linux-ubuntu/*.license-inventory.json
             build/ubuntu-skip-report.*
+            build/ubuntu-ingestion-benchmark.json
+            build/nmap-flow-analyzer.cdx.json
           if-no-files-found: error

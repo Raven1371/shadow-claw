@@ -92,4 +92,4 @@ def test_both_console_commands_share_entry_point() -> None:
 
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
     assert project["scripts"]["shadow-claw"] == project["scripts"]["nmap-flow-analyzer"]
-    assert project["dependencies"][-1] == "shadow-core>=0.2.0.dev0,<0.3"
+    assert project["dependencies"][-1] == "shadow-core>=0.3.0.dev0,<0.4"

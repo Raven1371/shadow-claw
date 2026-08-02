@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": {
     "name": "nmap-flow-analyzer",
-    "version": "1.5.0.dev0",
+    "version": "1.6.0.dev0",
     "license": "PolyForm-Noncommercial-1.0.0",
     "copyright": "Copyright 2026 Kache Flanery",
     "source_url": "https://github.com/Raven1371/shadow-claw",
