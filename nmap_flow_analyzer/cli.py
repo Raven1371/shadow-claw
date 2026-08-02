@@ -123,6 +123,22 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--zeek-required", action="store_true",
                         help="Treat missing or unusable Zeek conn.log data as "
                              "a fatal error instead of continuing Nmap-only")
+    parser.add_argument("--pcap", type=Path, action="append", default=None,
+                        help="Bounded classic PCAP input (may be repeated)")
+    parser.add_argument("--pcapng", type=Path, action="append", default=None,
+                        help="Bounded PCAPNG input (may be repeated)")
+    parser.add_argument("--suricata-eve", type=Path, action="append", default=None,
+                        help="Bounded Suricata EVE JSONL input (may be repeated)")
+    parser.add_argument("--suricata-rules", type=Path, action="append", default=None,
+                        help="Optional bounded Suricata rule metadata input")
+    parser.add_argument("--packet-metadata-only", action="store_true", default=True,
+                        help="Retain packet metadata only (the safe default)")
+    parser.add_argument("--packet-payload-limit", type=int, default=0,
+                        help="Maximum normalized payload bytes; currently must remain 0")
+    parser.add_argument("--flow-table-limit", type=int, default=100_000,
+                        help="Maximum active native-capture flows")
+    parser.add_argument("--ingestion-strict", action="store_true",
+                        help="Stop the selected adapter on the first malformed record")
     parser.add_argument("--no-preflight", action="store_true",
                         help="Explicitly suppress startup preflight checks")
     parser.add_argument("--non-interactive", action="store_true",
@@ -140,6 +156,59 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version",
                         version=f"{TOOL_NAME} {__version__}")
     return parser
+
+
+def _run_streaming_adapters(args: argparse.Namespace, staging: Path) -> dict[str, object]:
+    from shadow_core.ingestion import AdapterContext, EvidenceSource, ResourceBudget
+    from shadow_core.hashing import sha256_file
+    from shadow_core.identifiers import stable_identifier
+
+    from .ingestion import PcapAdapter, PcapngAdapter, SuricataEveAdapter, parse_suricata_rules
+
+    if args.packet_payload_limit != 0:
+        raise ValueError("packet payload normalization is not enabled in this milestone")
+    if args.flow_table_limit <= 0:
+        raise ValueError("--flow-table-limit must be positive")
+    budget = ResourceBudget(max_active_flows=args.flow_table_limit)
+    context = AdapterContext(budget=budget, strict=args.ingestion_strict)
+    results: list[dict[str, object]] = []
+    records: list[dict[str, object]] = []
+    inputs = [
+        *((path, PcapAdapter) for path in (args.pcap or [])),
+        *((path, PcapngAdapter) for path in (args.pcapng or [])),
+        *((path, SuricataEveAdapter) for path in (args.suricata_eve or [])),
+    ]
+    captures = [*(args.pcap or []), *(args.pcapng or [])]
+    shared_capture_source = (
+        stable_identifier("source", {"sha256": sha256_file(captures[0])})
+        if len(captures) == 1 else None
+    )
+    for path, adapter_type in inputs:
+        adapter = adapter_type()
+        parent = shared_capture_source if adapter.name in {"pcap", "pcapng", "suricata-eve"} else None
+        source = EvidenceSource(path, parent_evidence_id=parent)
+        probe = adapter.probe(source, context)
+        if not probe.magic_matched:
+            raise ValueError(f"{path}: content does not match {adapter.name}")
+        streamed = list(adapter.records(source, context))
+        records.extend({
+            "id": record.id, "record_type": record.record_type,
+            "observed_at": record.observed_at, "data": record.data,
+            "raw_sha256": record.raw_sha256,
+            "independent_source_id": record.independent_source_id,
+            "analysis_perspective": record.analysis_perspective,
+            "location": dataclasses.asdict(record.location),
+        } for record in streamed)
+        results.append({
+            "path": path.name, "adapter": adapter.name,
+            "probe": dataclasses.asdict(probe),
+            "summary": dataclasses.asdict(adapter.summary) if adapter.summary else None,
+            "diagnostics": [dataclasses.asdict(item) for item in adapter.diagnostics],
+        })
+    rule_metadata = [record for path in (args.suricata_rules or []) for record in parse_suricata_rules(path)]
+    value: dict[str, object] = {"adapters": results, "records": records, "suricata_rule_metadata": rule_metadata}
+    atomic_write_text(staging / "ingestion_summary.json", json.dumps(value, indent=2, sort_keys=True, default=str) + "\n")
+    return value
 
 
 def _apply_cli_overrides(
@@ -496,6 +565,8 @@ def _main(argv: Optional[List[str]] = None) -> int:
 
     try:
         staging = ctx.staging_dir
+        if args.pcap or args.pcapng or args.suricata_eve or args.suricata_rules:
+            _run_streaming_adapters(args, staging)
         write_csv(staging / "service_inventory.csv", service_records,
                   ServiceRecord, sanitize=sanitize)
         write_json(staging / "service_inventory.json", service_records)
@@ -689,6 +760,10 @@ def _main(argv: Optional[List[str]] = None) -> int:
                 zeek_dirs,
                 args.shadow_case_id,
                 args.shadow_case_title or args.shadow_case_id,
+                pcap_paths=args.pcap or (),
+                pcapng_paths=args.pcapng or (),
+                eve_paths=args.suricata_eve or (),
+                rule_paths=args.suricata_rules or (),
             )
         _write_manifest(ctx, staging, args, metadata, diagram, excel_generated,
                         zeek_analysis=zeek_analysis, zeek_active=zeek_active)

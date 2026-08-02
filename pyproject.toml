@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nmap-flow-analyzer"
-version = "1.4.0.dev0"
+version = "1.5.0.dev0"
 description = "Shadow Claw offline network investigation with human-reviewed firewall recommendations"
 readme = "README.md"
 license = "PolyForm-Noncommercial-1.0.0"
@@ -12,12 +12,12 @@ license-files = [
   "LICENSE", "NOTICE", "COPYRIGHT.md", "COMMERCIAL_USE.md",
   "TRADEMARKS.md", "THIRD_PARTY_NOTICES.md",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
   "defusedxml==0.7.1",
   "PyYAML==6.0.2",
   "openpyxl==3.1.5",
-  "shadow-core>=0.1.0.dev0,<0.2",
+  "shadow-core>=0.2.0.dev0,<0.3",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -45,6 +45,9 @@ License = "https://polyformproject.org/licenses/noncommercial/1.0.0"
 
 [tool.setuptools]
 packages = ["nmap_flow_analyzer"]
+
+[tool.setuptools.package-data]
+nmap_flow_analyzer = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
