@@ -37,7 +37,8 @@ jobs:
     steps:
       - name: Install system tooling
         run: |
-          dnf install -y --setopt=tsflags= git python3 python3-pip graphviz gcc rpm-build rpm-sign dnf-plugins-core cpio findutils tar gzip
+          dnf install -y --setopt=tsflags= git python3.11 python3.11-pip graphviz gcc rpm-build rpm-sign dnf-plugins-core cpio findutils tar gzip
+          ln -sf /usr/bin/python3.11 /usr/local/bin/python3
           # Rocky's minimal container preinstalls these with nodocs. Restore
           # their packaged license payloads before native attribution runs.
           dnf reinstall -y --setopt=tsflags= libstdc++ lz4-libs libxcb
