@@ -1,11 +1,15 @@
 import json
 import socket
 import struct
+import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
 from shadow_core.ingestion import AdapterContext, EvidenceSource, ResourceBudget
+from shadow_core.evidence import validate_package
+from shadow_core.serialization import parse_jsonl
 
 from nmap_flow_analyzer.ingestion import (
     PcapAdapter,
@@ -13,6 +17,8 @@ from nmap_flow_analyzer.ingestion import (
     SuricataEveAdapter,
     parse_suricata_rules,
 )
+from nmap_flow_analyzer.cli import _run_streaming_adapters
+from nmap_flow_analyzer.shadow_evidence import export_shadow_evidence
 
 
 def ethernet_udp_dns() -> bytes:
@@ -118,3 +124,34 @@ def test_bounded_suricata_rule_metadata(tmp_path: Path) -> None:
     assert parsed[0]["sid"] == "42"
     assert parsed[0]["rev"] == "3"
     assert "rule_source_sha256" in parsed[0]
+
+
+def test_adapter_records_and_raw_inputs_round_trip_through_shadow_evidence(tmp_path: Path) -> None:
+    pcap_path = tmp_path / "capture.pcap"
+    write_pcap(pcap_path)
+    eve_path = tmp_path / "eve.jsonl"
+    eve_path.write_text(json.dumps({"timestamp": "2026-01-01T00:00:00Z", "event_type": "alert", "flow_id": 1}) + "\n", encoding="utf-8")
+    nmap = tmp_path / "scan.xml"
+    nmap.write_text("<nmaprun/>", encoding="utf-8")
+    staging = tmp_path / "staging"
+    staging.mkdir()
+    (staging / "normalized_data.json").write_text("{}", encoding="utf-8")
+    args = SimpleNamespace(
+        packet_payload_limit=0, flow_table_limit=100, ingestion_strict=True,
+        pcap=[pcap_path], pcapng=[], suricata_eve=[eve_path], suricata_rules=[],
+    )
+    _run_streaming_adapters(args, staging)
+    package = export_shadow_evidence(
+        staging, nmap, (), "case-adapters", "Adapters",
+        pcap_paths=[pcap_path], eve_paths=[eve_path],
+    )
+    assert validate_package(package).valid
+    with zipfile.ZipFile(package) as archive:
+        assert "evidence/pcap/0/capture.pcap" in archive.namelist()
+        assert "evidence/suricata/eve/0/eve.jsonl" in archive.namelist()
+        events = parse_jsonl(archive.read("normalized/events.jsonl"))
+        packet = next(event for event in events if event["message"].endswith("packet record"))
+        alert = next(event for event in events if event["message"].endswith("suricata.alert record"))
+        assert packet["shadow"]["packet_number"] == 1
+        assert alert["shadow"]["line_number"] == 1
+        assert packet["shadow"]["independent_source_id"] == alert["shadow"]["independent_source_id"]

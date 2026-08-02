@@ -39,21 +39,28 @@ def _raw_payload(
 ) -> tuple[dict[str, bytes], list[dict[str, Any]]]:
     payload: dict[str, bytes] = {}
     provenance: list[dict[str, Any]] = []
-    inputs = [("evidence/other/nmap.xml", input_path, "nmap")]
+    inputs: list[tuple[str, Path, str, str | None]] = [
+        ("evidence/other/nmap.xml", input_path, "nmap", None)
+    ]
     for directory_index, directory in enumerate(zeek_dirs):
         for path in sorted(directory.iterdir()):
             if path.is_file() and not path.is_symlink():
-                inputs.append((f"evidence/zeek/{directory_index}/{path.name}", path, "zeek"))
-    for index, path in enumerate((*pcap_paths, *pcapng_paths)):
-        inputs.append((f"evidence/pcap/{index}/{path.name}", path, "native-packet"))
+                inputs.append((f"evidence/zeek/{directory_index}/{path.name}", path, "zeek", None))
+    captures = (*pcap_paths, *pcapng_paths)
+    capture_source = None
+    for index, path in enumerate(captures):
+        data = path.read_bytes()
+        source = stable_identifier("source", {"sha256": sha256_bytes(data)})
+        capture_source = source if len(captures) == 1 else None
+        inputs.append((f"evidence/pcap/{index}/{path.name}", path, "native-packet", source))
     for index, path in enumerate(eve_paths):
-        inputs.append((f"evidence/suricata/eve/{index}/{path.name}", path, "suricata"))
+        inputs.append((f"evidence/suricata/eve/{index}/{path.name}", path, "suricata", capture_source))
     for index, path in enumerate(rule_paths):
-        inputs.append((f"evidence/suricata/rules/{index}/{path.name}", path, "suricata-rule-metadata"))
-    for member, path, perspective in inputs:
+        inputs.append((f"evidence/suricata/rules/{index}/{path.name}", path, "suricata-rule-metadata", None))
+    for member, path, perspective, source_override in inputs:
         data = path.read_bytes()
         digest = sha256_bytes(data)
-        source = stable_identifier("source", {"sha256": digest})
+        source = source_override or stable_identifier("source", {"sha256": digest})
         payload[member] = data
         provenance.append({
             "id": stable_identifier("provenance", {"source": source, "perspective": perspective, "path": member}),
@@ -61,11 +68,39 @@ def _raw_payload(
             "analysis_perspective": perspective,
             "observation_type": "direct",
             "raw_sha256": digest,
-            "parent_evidence_id": None,
+            "parent_evidence_id": capture_source if perspective == "suricata" else None,
             "parser_name": "nmap-flow-analyzer",
             "parser_version": __version__,
         })
     return payload, provenance
+
+
+def _adapter_events(staging: Path) -> list[dict[str, Any]]:
+    summary = _load(staging / "ingestion_summary.json", {})
+    events: list[dict[str, Any]] = []
+    for record in summary.get("records", []):
+        record_type = str(record["record_type"])
+        category = "security_finding" if record_type == "suricata.alert" else "dns_activity" if record_type == "suricata.dns" else "system_activity" if record_type == "suricata.stats" else "network_activity"
+        location = record.get("location", {})
+        events.append({
+            "id": record["id"], "category": category,
+            "time": record.get("observed_at") or "1970-01-01T00:00:00.000000Z",
+            "message": f"Shadow Claw {record_type} record", "data": record.get("data", {}),
+            "shadow": {
+                "raw_sha256": record["raw_sha256"],
+                "independent_source_id": record["independent_source_id"],
+                "analysis_perspective": record["analysis_perspective"],
+                "byte_offset": location.get("byte_offset"),
+                "line_number": location.get("line_number"),
+                "packet_number": location.get("packet_number"),
+                "block_index": location.get("block_index"),
+                "interface_id": location.get("interface_id"),
+                "parser_name": record["analysis_perspective"],
+                "parser_version": __version__, "normalizer_name": "shadow-claw",
+                "normalizer_version": __version__, "observation_type": "direct",
+            },
+        })
+    return events
 
 
 def _events(normalized: Mapping[str, Any], provenance: list[dict[str, Any]], timestamp: str) -> list[dict[str, Any]]:
@@ -119,7 +154,7 @@ def export_shadow_evidence(
     raw_payload, provenance = _raw_payload(
         input_path, zeek_dirs, pcap_paths, pcapng_paths, eve_paths, rule_paths
     )
-    events = _events(normalized, provenance, created_at)
+    events = _events(normalized, provenance, created_at) + _adapter_events(staging)
     lineage = validate_provenance(provenance)
     assets = normalized.get("hosts", [])
     services = normalized.get("service_inventory", [])

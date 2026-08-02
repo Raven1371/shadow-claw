@@ -40,7 +40,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Raven1371/shadow-core
-          ref: d3f0ef978b671824d89e4cab9432807f9e0f868a
+          ref: b5328e605a8a6879981f92343284e509f5e2c162
           path: shadow-core-source
       - uses: actions/setup-python@v5
         with:

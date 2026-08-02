@@ -160,6 +160,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def _run_streaming_adapters(args: argparse.Namespace, staging: Path) -> dict[str, object]:
     from shadow_core.ingestion import AdapterContext, EvidenceSource, ResourceBudget
+    from shadow_core.hashing import sha256_file
+    from shadow_core.identifiers import stable_identifier
 
     from .ingestion import PcapAdapter, PcapngAdapter, SuricataEveAdapter, parse_suricata_rules
 
@@ -176,9 +178,15 @@ def _run_streaming_adapters(args: argparse.Namespace, staging: Path) -> dict[str
         *((path, PcapngAdapter) for path in (args.pcapng or [])),
         *((path, SuricataEveAdapter) for path in (args.suricata_eve or [])),
     ]
+    captures = [*(args.pcap or []), *(args.pcapng or [])]
+    shared_capture_source = (
+        stable_identifier("source", {"sha256": sha256_file(captures[0])})
+        if len(captures) == 1 else None
+    )
     for path, adapter_type in inputs:
         adapter = adapter_type()
-        source = EvidenceSource(path)
+        parent = shared_capture_source if adapter.name in {"pcap", "pcapng", "suricata-eve"} else None
+        source = EvidenceSource(path, parent_evidence_id=parent)
         probe = adapter.probe(source, context)
         if not probe.magic_matched:
             raise ValueError(f"{path}: content does not match {adapter.name}")
