@@ -216,7 +216,14 @@ def main() -> int:
     package_license_root.mkdir(parents=True, exist_ok=True)
     python_evidence: dict[str, list[str]] = {}
     source_fallback_cache: dict[str, tuple[list[Path], dict[str, str]]] = {}
-    for dist_name in ("defusedxml", "PyYAML", "openpyxl", "et_xmlfile", "pyinstaller"):
+    for dist_name in (
+        "defusedxml",
+        "PyYAML",
+        "openpyxl",
+        "et_xmlfile",
+        "pyinstaller",
+        "rpds-py",
+    ):
         dist = importlib.metadata.distribution(dist_name)
         copied = []
         for item in dist.files or ():
@@ -287,6 +294,14 @@ def main() -> int:
             special = ("pyinstaller", "6.21.0", "x86_64", "GPL-2.0-or-later WITH Bootloader-exception", python_evidence["pyinstaller"])
         elif "_yaml" in lower:
             special = ("PyYAML", "6.0.2", "x86_64", "MIT", python_evidence["pyyaml"])
+        elif "/rpds/" in lower and shipped.name.startswith("rpds."):
+            special = (
+                "rpds-py",
+                "0.27.0",
+                "x86_64",
+                "MIT",
+                python_evidence["rpds-py"],
+            )
         elif "libpython" in lower or "lib-dynload" in lower:
             special = ("CPython", run("python3", "--version").split()[-1], "x86_64", "PSF-2.0", python_license_paths)
         if not attribution and special:
