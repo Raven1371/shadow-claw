@@ -26,12 +26,16 @@ consume a separately versioned Core boundary when that integration is approved.
 
 ## Ecosystem principles
 
-> Shadow Fang monitors and detects.  
-> Shadow Claw investigates and validates.  
+> Shadow Fang monitors and detects.
+>
+> Shadow Claw investigates and validates.
+>
 > Shadow Core ensures both applications understand the same evidence.
 
-> The software recommends.  
-> The human decides.  
+> The software recommends.
+>
+> The human decides.
+>
 > The human implements.
 
 ## Planned Shadow Evidence boundary
