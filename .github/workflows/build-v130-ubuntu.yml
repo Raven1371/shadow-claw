@@ -34,6 +34,12 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout immutable Shadow Core source
+        uses: actions/checkout@v4
+        with:
+          repository: Raven1371/shadow-core
+          ref: 599fa332577587dcbe528195c37b417db12d58f4
+          path: shadow-core-source
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -42,8 +48,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y graphviz libgraphviz-dev pkg-config dpkg-dev curl
+          python -m pip install build==1.3.0
+          python -m build --wheel shadow-core-source --outdir build/shadow-core-wheel
+          python -m pip install build/shadow-core-wheel/shadow_core-0.1.0.dev0-py3-none-any.whl
           python -m pip install -r requirements-dev.lock
           python -m pip install --no-deps -e .
+          python -c "import shadow_core; assert shadow_core.__version__ == '0.1.0.dev0'"
       - name: Test current v1.3.0 source
         run: |
           python -m compileall -q nmap_flow_analyzer
