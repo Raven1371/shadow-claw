@@ -30,6 +30,7 @@ def main() -> int:
     parser.add_argument("--command", type=Path, required=True)
     parser.add_argument("--examples", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--expected-version", default="1.3.0")
     parser.add_argument("--require-graphviz", action="store_true")
     args = parser.parse_args()
     command = str(args.command.resolve())
@@ -39,7 +40,7 @@ def main() -> int:
         root = Path(tmp)
         run([command, "--help"], root)
         version = run([command, "--version"], root).stdout.strip()
-        if "1.3.0" not in version:
+        if args.expected_version not in version:
             raise RuntimeError(f"unexpected package version: {version}")
         doctor = run([command, "doctor", "--non-interactive"], root)
         if "No automatic update checks are performed." not in doctor.stdout:

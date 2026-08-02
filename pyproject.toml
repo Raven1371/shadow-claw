@@ -17,6 +17,7 @@ dependencies = [
   "defusedxml==0.7.1",
   "PyYAML==6.0.2",
   "openpyxl==3.1.5",
+  "shadow-core>=0.1.0.dev0,<0.2",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
@@ -35,6 +36,7 @@ dev = [
 
 [project.scripts]
 nmap-flow-analyzer = "nmap_flow_analyzer.cli:main"
+shadow-claw = "nmap_flow_analyzer.cli:main"
 
 [project.urls]
 Repository = "https://github.com/Raven1371/shadow-claw"
