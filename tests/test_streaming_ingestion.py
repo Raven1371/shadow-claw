@@ -1,11 +1,10 @@
 import json
 import socket
 import struct
+import tempfile
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
-
-import pytest
 
 from shadow_core.ingestion import AdapterContext, EvidenceSource, ResourceBudget
 from shadow_core.evidence import validate_package
@@ -53,7 +52,13 @@ def write_pcapng(path: Path) -> None:
     path.write_bytes(section + interface + packet + unknown)
 
 
-def test_suricata_streaming_health_unknown_and_checkpoint(tmp_path: Path) -> None:
+def test_suricata_streaming_health_unknown_and_checkpoint() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        tmp_path = Path(directory)
+        _test_suricata_streaming_health_unknown_and_checkpoint(tmp_path)
+
+
+def _test_suricata_streaming_health_unknown_and_checkpoint(tmp_path: Path) -> None:
     path = tmp_path / "eve.data"
     rows = [
         {"timestamp": "2026-01-01T00:00:00-05:00", "event_type": "alert", "flow_id": 7, "host": "sensor-a", "alert": {"signature_id": 1}},
@@ -70,7 +75,13 @@ def test_suricata_streaming_health_unknown_and_checkpoint(tmp_path: Path) -> Non
     assert checkpoint and list(SuricataEveAdapter().records(EvidenceSource(path), AdapterContext(checkpoint=checkpoint))) == []
 
 
-def test_suricata_partial_and_hostile_limits(tmp_path: Path) -> None:
+def test_suricata_partial_and_hostile_limits() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        tmp_path = Path(directory)
+        _test_suricata_partial_and_hostile_limits(tmp_path)
+
+
+def _test_suricata_partial_and_hostile_limits(tmp_path: Path) -> None:
     path = tmp_path / "eve"
     path.write_bytes(b'{"timestamp":"2026-01-01T00:00:00Z","event_type":"flow"}\n{bad}\n')
     adapter = SuricataEveAdapter()
@@ -81,8 +92,14 @@ def test_suricata_partial_and_hostile_limits(tmp_path: Path) -> None:
     assert limited.summary and limited.summary.status == "resource_limited"
 
 
-@pytest.mark.parametrize(("endian", "nanos"), [("<", False), (">", False), ("<", True), (">", True)])
-def test_classic_pcap_variants_stream_packet_metadata(tmp_path: Path, endian: str, nanos: bool) -> None:
+def test_classic_pcap_variants_stream_packet_metadata() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        tmp_path = Path(directory)
+        for endian, nanos in [("<", False), (">", False), ("<", True), (">", True)]:
+            _test_classic_pcap_variant_streams_packet_metadata(tmp_path, endian, nanos)
+
+
+def _test_classic_pcap_variant_streams_packet_metadata(tmp_path: Path, endian: str, nanos: bool) -> None:
     path = tmp_path / "capture.dat"
     write_pcap(path, endian, nanos)
     adapter = PcapAdapter()
@@ -94,7 +111,13 @@ def test_classic_pcap_variants_stream_packet_metadata(tmp_path: Path, endian: st
     assert adapter.flows and len(adapter.flows.items()) == 1
 
 
-def test_pcap_rejects_invalid_lengths(tmp_path: Path) -> None:
+def test_pcap_rejects_invalid_lengths() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        tmp_path = Path(directory)
+        _test_pcap_rejects_invalid_lengths(tmp_path)
+
+
+def _test_pcap_rejects_invalid_lengths(tmp_path: Path) -> None:
     path = tmp_path / "bad"
     write_pcap(path)
     raw = bytearray(path.read_bytes())
@@ -105,7 +128,13 @@ def test_pcap_rejects_invalid_lengths(tmp_path: Path) -> None:
     assert adapter.summary and adapter.summary.status == "resource_limited"
 
 
-def test_pcapng_interfaces_timestamps_and_unknown_blocks(tmp_path: Path) -> None:
+def test_pcapng_interfaces_timestamps_and_unknown_blocks() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        tmp_path = Path(directory)
+        _test_pcapng_interfaces_timestamps_and_unknown_blocks(tmp_path)
+
+
+def _test_pcapng_interfaces_timestamps_and_unknown_blocks(tmp_path: Path) -> None:
     path = tmp_path / "capture.bin"
     write_pcapng(path)
     adapter = PcapngAdapter()
@@ -117,7 +146,13 @@ def test_pcapng_interfaces_timestamps_and_unknown_blocks(tmp_path: Path) -> None
     assert any(item.code == "unknown_block" for item in adapter.diagnostics)
 
 
-def test_bounded_suricata_rule_metadata(tmp_path: Path) -> None:
+def test_bounded_suricata_rule_metadata() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        tmp_path = Path(directory)
+        _test_bounded_suricata_rule_metadata(tmp_path)
+
+
+def _test_bounded_suricata_rule_metadata(tmp_path: Path) -> None:
     path = tmp_path / "rules"
     path.write_text('alert tcp any any -> any any (msg:"Example"; sid:42; rev:3; classtype:test; reference:url,example.invalid;)\n', encoding="utf-8")
     parsed = list(parse_suricata_rules(path))
@@ -126,7 +161,13 @@ def test_bounded_suricata_rule_metadata(tmp_path: Path) -> None:
     assert "rule_source_sha256" in parsed[0]
 
 
-def test_adapter_records_and_raw_inputs_round_trip_through_shadow_evidence(tmp_path: Path) -> None:
+def test_adapter_records_and_raw_inputs_round_trip_through_shadow_evidence() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        tmp_path = Path(directory)
+        _test_adapter_records_and_raw_inputs_round_trip_through_shadow_evidence(tmp_path)
+
+
+def _test_adapter_records_and_raw_inputs_round_trip_through_shadow_evidence(tmp_path: Path) -> None:
     pcap_path = tmp_path / "capture.pcap"
     write_pcap(pcap_path)
     eve_path = tmp_path / "eve.jsonl"
