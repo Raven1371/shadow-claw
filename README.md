@@ -13,7 +13,7 @@ validated Windows support or a fully cross-platform production release. The
 existing Linux [`v1.3.0-rc1`](https://github.com/Raven1371/shadow-claw/releases/tag/v1.3.0-rc1)
 prerelease remains available and unchanged.
 
-Development version `1.5.0.dev0` adds opt-in bounded `--pcap`, `--pcapng`,
+Development version `1.6.0.dev0` retains opt-in bounded `--pcap`, `--pcapng`,
 `--suricata-eve`, and `--suricata-rules` ingestion. With none of these options,
 the established Nmap and Zeek pipeline is unchanged. Packet payload extraction,
 decryption, complete Suricata rule parsing, Windows support, and automatic
