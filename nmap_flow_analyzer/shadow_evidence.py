@@ -29,7 +29,14 @@ def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
-def _raw_payload(input_path: Path, zeek_dirs: Iterable[Path]) -> tuple[dict[str, bytes], list[dict[str, Any]]]:
+def _raw_payload(
+    input_path: Path,
+    zeek_dirs: Iterable[Path],
+    pcap_paths: Iterable[Path] = (),
+    pcapng_paths: Iterable[Path] = (),
+    eve_paths: Iterable[Path] = (),
+    rule_paths: Iterable[Path] = (),
+) -> tuple[dict[str, bytes], list[dict[str, Any]]]:
     payload: dict[str, bytes] = {}
     provenance: list[dict[str, Any]] = []
     inputs = [("evidence/other/nmap.xml", input_path, "nmap")]
@@ -37,6 +44,12 @@ def _raw_payload(input_path: Path, zeek_dirs: Iterable[Path]) -> tuple[dict[str,
         for path in sorted(directory.iterdir()):
             if path.is_file() and not path.is_symlink():
                 inputs.append((f"evidence/zeek/{directory_index}/{path.name}", path, "zeek"))
+    for index, path in enumerate((*pcap_paths, *pcapng_paths)):
+        inputs.append((f"evidence/pcap/{index}/{path.name}", path, "native-packet"))
+    for index, path in enumerate(eve_paths):
+        inputs.append((f"evidence/suricata/eve/{index}/{path.name}", path, "suricata"))
+    for index, path in enumerate(rule_paths):
+        inputs.append((f"evidence/suricata/rules/{index}/{path.name}", path, "suricata-rule-metadata"))
     for member, path, perspective in inputs:
         data = path.read_bytes()
         digest = sha256_bytes(data)
@@ -92,13 +105,20 @@ def export_shadow_evidence(
     zeek_dirs: Iterable[Path],
     case_id: str,
     case_title: str,
+    *,
+    pcap_paths: Iterable[Path] = (),
+    pcapng_paths: Iterable[Path] = (),
+    eve_paths: Iterable[Path] = (),
+    rule_paths: Iterable[Path] = (),
 ) -> Path:
     """Add a deterministic Core-validated evidence package to staged outputs."""
     if not _CASE_ID.fullmatch(case_id):
         raise ValueError("--shadow-case-id must contain only letters, numbers, dot, underscore, or hyphen")
     normalized = _load(staging / "normalized_data.json", {})
     created_at = _utc_now()
-    raw_payload, provenance = _raw_payload(input_path, zeek_dirs)
+    raw_payload, provenance = _raw_payload(
+        input_path, zeek_dirs, pcap_paths, pcapng_paths, eve_paths, rule_paths
+    )
     events = _events(normalized, provenance, created_at)
     lineage = validate_provenance(provenance)
     assets = normalized.get("hosts", [])
