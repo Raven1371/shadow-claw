@@ -65,7 +65,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
             "Unknown / Manual Review Required)."
         ),
     )
-    parser.add_argument("--input", required=True, type=Path,
+    parser.add_argument("--input", required=False, type=Path,
                         help="Nmap XML report (e.g. full-scan.xml)")
     parser.add_argument("--config", type=Path, default=None,
                         help="Optional YAML configuration file")
@@ -127,6 +127,16 @@ def build_arg_parser() -> argparse.ArgumentParser:
                         help="Explicitly suppress startup preflight checks")
     parser.add_argument("--non-interactive", action="store_true",
                         help="Run without prompts (normal analysis is already prompt-free)")
+    parser.add_argument("--export-shadow-evidence", action="store_true",
+                        help="Also export a Core-validated .shadowevidence.zip package")
+    parser.add_argument("--shadow-case-id",
+                        help="Stable case identifier used for Shadow Evidence export")
+    parser.add_argument("--shadow-case-title",
+                        help="Human-readable Shadow Evidence case title")
+    parser.add_argument("--import-shadow-evidence", type=Path,
+                        help="Validate and safely import a .shadowevidence.zip into --output-dir")
+    parser.add_argument("--verify-shadow-evidence", type=Path,
+                        help="Validate a .shadowevidence.zip without importing it")
     parser.add_argument("--version", action="version",
                         version=f"{TOOL_NAME} {__version__}")
     return parser
@@ -332,6 +342,28 @@ def _main(argv: Optional[List[str]] = None) -> int:
     args = build_arg_parser().parse_args(argv)
 
     output_dir: Path = args.output_dir
+    if args.verify_shadow_evidence:
+        from .shadow_evidence import verify_shadow_evidence
+
+        result = verify_shadow_evidence(args.verify_shadow_evidence)
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0 if result["valid"] else 2
+    if args.import_shadow_evidence:
+        from .shadow_evidence import import_shadow_evidence
+
+        try:
+            imported = import_shadow_evidence(args.import_shadow_evidence, output_dir)
+        except Exception as exc:
+            print(f"error: Shadow Evidence import failed: {exc}", file=sys.stderr)
+            return 2
+        print(f"Shadow Evidence imported to: {imported}")
+        return 0
+    if args.input is None:
+        print("error: --input is required unless importing or verifying Shadow Evidence", file=sys.stderr)
+        return 2
+    if args.export_shadow_evidence and not args.shadow_case_id:
+        print("error: --shadow-case-id is required with --export-shadow-evidence", file=sys.stderr)
+        return 2
     refusal = check_output_dir(output_dir, args.overwrite)
     if refusal:
         print(f"error: {refusal}", file=sys.stderr)
@@ -518,7 +550,7 @@ def _main(argv: Optional[List[str]] = None) -> int:
             + int(diagram.svg_rendered) + int(diagram.png_rendered)
             + int(excel_generated)
             + 3  # findings_summary.md, normalized_data.json, analysis_report.html
-            + 1  # run_manifest.json
+            + 1  # run_manifest.json; optional package is additive metadata
         )
         run_status = {
             "Application version": f"{TOOL_NAME} {__version__}",
@@ -648,6 +680,16 @@ def _main(argv: Optional[List[str]] = None) -> int:
             flows, inbound, outbound, reviews, vulns, assumptions,
             run_status=run_status, diagram=diagram, zeek=zeek_report,
         )
+        if args.export_shadow_evidence:
+            from .shadow_evidence import export_shadow_evidence
+
+            export_shadow_evidence(
+                staging,
+                args.input,
+                zeek_dirs,
+                args.shadow_case_id,
+                args.shadow_case_title or args.shadow_case_id,
+            )
         _write_manifest(ctx, staging, args, metadata, diagram, excel_generated,
                         zeek_analysis=zeek_analysis, zeek_active=zeek_active)
 
