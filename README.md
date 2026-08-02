@@ -74,6 +74,36 @@ nmap-flow-analyzer preflight --json --non-interactive
 See `docs/PREFLIGHT.md` for checks, automation behavior, and Graphviz
 resolution details. No automatic update checks are performed.
 
+### Shadow Evidence integration
+
+Both installed commands invoke the same supported entry point:
+
+```bash
+shadow-claw --version
+nmap-flow-analyzer --version
+```
+
+The compatibility command remains fully supported. To add a Core-validated
+Shadow Evidence package without replacing existing reports:
+
+```bash
+shadow-claw --input scan.xml --zeek-dir ./zeek \
+  --output-dir ./out --export-shadow-evidence \
+  --shadow-case-id case-001 --shadow-case-title "Network investigation"
+```
+
+Validate or safely stage/import a hostile package without executing content:
+
+```bash
+shadow-claw --verify-shadow-evidence case-001.shadowevidence.zip
+shadow-claw --import-shadow-evidence case-001.shadowevidence.zip \
+  --output-dir ./imported-case
+```
+
+Shadow Core is a separately built dependency. For local workspace development,
+build its wheel and install it with `scripts/install-local-shadow-core.ps1`;
+the repository never vendors Core source or commits an absolute local path.
+
 Optional, for SVG/PNG diagram rendering (the `.dot` and `.mmd` sources are always written even without it):
 
 ```bash
