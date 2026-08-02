@@ -1,4 +1,4 @@
-"""Regression tests for authoritative v1.3.0 Python package metadata."""
+"""Regression tests for authoritative Python package metadata."""
 
 import sys
 from pathlib import Path
@@ -25,7 +25,7 @@ def _metadata():
 
 def test_pyproject_is_authoritative_for_version_and_entry_point():
     project = _metadata()["project"]
-    assert project["version"] == __version__ == "1.3.0"
+    assert project["version"] == __version__ == "1.4.0.dev0"
     assert project["scripts"]["nmap-flow-analyzer"] == (
         "nmap_flow_analyzer.cli:main"
     )

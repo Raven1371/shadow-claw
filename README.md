@@ -1,4 +1,22 @@
-# nmap-flow-analyzer
+# Shadow Claw™
+
+Shadow Claw is the offline, deterministic investigation component of the
+Shadow Ecosystem. This repository is `Raven1371/shadow-claw`. The existing
+`nmap-flow-analyzer` command, Python package and import paths remain the
+supported compatibility interface while a future `shadow-claw` command is
+planned.
+
+Active development is Linux-first on Ubuntu 24.04 x64 and Rocky Linux 9 /
+RHEL-compatible x64. Windows validation, packaging, and application
+integration are deferred to a later dedicated phase; this is not a claim of
+validated Windows support or a fully cross-platform production release. The
+existing Linux [`v1.3.0-rc1`](https://github.com/Raven1371/shadow-claw/releases/tag/v1.3.0-rc1)
+prerelease remains available and unchanged.
+
+Shadow Core and Shadow Fang are separate products. Their integration is not
+implemented by this repository-preparation work. Shadow Claw produces
+analysis, reports, and candidate recommendations; it does not automatically
+enforce firewall, IPS, directory, endpoint, or cloud changes.
 
 ## License and Commercial Use
 
@@ -34,7 +52,8 @@ nmap-flow-analyzer --help
 For development:
 
 ```bash
-cd nmap-flow-analyzer
+git clone https://github.com/Raven1371/shadow-claw.git
+cd shadow-claw
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 python -m pip install -e ".[dev]"

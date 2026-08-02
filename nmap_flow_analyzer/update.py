@@ -25,7 +25,7 @@ from typing import Dict, Iterable, Optional
 from . import TOOL_NAME, __version__
 
 
-REPOSITORY = "Raven1371/Nmap-scan-and-reports"
+REPOSITORY = "Raven1371/shadow-claw"
 RELEASES_URL = f"https://github.com/{REPOSITORY}/releases"
 API_ROOT = f"https://api.github.com/repos/{REPOSITORY}/releases"
 MAX_DOWNLOAD = 2 * 1024 * 1024 * 1024
