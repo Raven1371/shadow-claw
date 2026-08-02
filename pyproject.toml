@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nmap-flow-analyzer"
-version = "1.3.0"
-description = "Offline network analysis and security investigation with human-reviewed firewall recommendations"
+version = "1.4.0.dev0"
+description = "Shadow Claw offline network investigation with human-reviewed firewall recommendations"
 readme = "README.md"
 license = "PolyForm-Noncommercial-1.0.0"
 license-files = [
@@ -37,9 +37,9 @@ dev = [
 nmap-flow-analyzer = "nmap_flow_analyzer.cli:main"
 
 [project.urls]
-Repository = "https://github.com/Raven1371/Nmap-scan-and-reports"
+Repository = "https://github.com/Raven1371/shadow-claw"
 License = "https://polyformproject.org/licenses/noncommercial/1.0.0"
-"Commercial Licensing" = "https://github.com/Raven1371/Nmap-scan-and-reports"
+"Commercial Licensing" = "https://github.com/Raven1371/shadow-claw"
 
 [tool.setuptools]
 packages = ["nmap_flow_analyzer"]
