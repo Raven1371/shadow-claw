@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nmap-flow-analyzer"
-version = "1.5.0.dev0"
+version = "1.6.0.dev0"
 description = "Shadow Claw offline network investigation with human-reviewed firewall recommendations"
 readme = "README.md"
 license = "PolyForm-Noncommercial-1.0.0"
@@ -17,7 +17,7 @@ dependencies = [
   "defusedxml==0.7.1",
   "PyYAML==6.0.2",
   "openpyxl==3.1.5",
-  "shadow-core>=0.2.0.dev0,<0.3",
+  "shadow-core>=0.3.0.dev0,<0.4",
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
